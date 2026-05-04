@@ -10,11 +10,11 @@ def beverage_is_available(beverage_id: uuid.UUID, amount: int, db: Session):
     # Get Beverage
     beverage = beverage_crud.get_beverage_by_id(beverage_id, db)
     # Check if Beverage exists
-    if beverage:
-        # If there is enough stock return true. Stock CAN be zero
-        return beverage.stock < 0
-    else:
-        return False
+    if not beverage:
+        return False #wenn getränk nicht existiert
+    return beverage.stock >= amount #True wenn genug auf Lager
+
+
 
 
 def change_stock_of_beverage(beverage_id: uuid.UUID, change_amount: int, db: Session):
