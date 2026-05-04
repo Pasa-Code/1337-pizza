@@ -10,7 +10,7 @@ x-common-variables: &DB_VARIABLES
 
 services:
   web:
-    container_name: <git_repository_name>_1337_pizza_web_dev
+    container_name: Girschick-Mo3-Green_1337_pizza_web_dev
     build:
       context: ./
       dockerfile: ./infra/build_artifacts/development.dockerfile
@@ -23,10 +23,10 @@ services:
     depends_on:
       db-dev:
         condition: service_healthy
-    entrypoint: [ ]
+
 
   db-dev:
-    container_name: <git_repository_name>_1337_pizza_db_dev
+    container_name: Girschick-Mo3-Green_1337_pizza_db_dev
     image: registry.code.fbi.h-da.de/software-engineering/containers/se-container-registry/postgres:15-alpine
     ports:
       - '5432:5432'

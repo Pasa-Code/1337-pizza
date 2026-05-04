@@ -14,7 +14,7 @@ def create_order(schema: OrderCreateSchema, db: Session):
     address = create_address(schema.address, db)
     order = Order(user_id=schema.user_id)
     order.address = address
-    order.order_status = OrderStatus.COMPLETED
+    order.order_status = OrderStatus.TRANSMITTED
     db.add(order)
     db.commit()
     return order
@@ -166,10 +166,10 @@ def get_price_of_pizza_in_order(order_id: uuid.UUID, db: Session):
 def calculate_price(price_beverage, price_pizza):
     if price_pizza is None:
         return price_beverage
-
-    # if order has pizza and beverage, return the price of pizza + beverage
-    if price_pizza is not None:
+    if price_beverage is None:
         return price_pizza
+    return price_pizza+price_beverage
+
 
 
 def get_price_of_order(
