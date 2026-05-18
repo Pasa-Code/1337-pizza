@@ -16,6 +16,7 @@ from app.api.v1.endpoints.order.schemas \
     OrderPriceSchema, OrderBeverageQuantityBaseSchema, OrderCreateSchema
 from app.api.v1.endpoints.user.schemas import UserSchema
 from app.database.connection import SessionLocal
+from app.api.v1.constants import NOT_FOUND_ERROR_OUTPUT
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ def get_all_orders(
 def create_order(order: OrderCreateSchema, db: Annotated[Session, Depends(get_db)],
                  copy_order_id: Optional[uuid.UUID] = None):
     if user_crud.get_user_by_id(order.user_id, db) is None:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     # Create Order
     new_order = order_crud.create_order(order, db)
@@ -53,7 +54,7 @@ def create_order(order: OrderCreateSchema, db: Annotated[Session, Depends(get_db
     copy_order = order_crud.get_order_by_id(copy_order_id, db)
     if not copy_order:
         order_crud.delete_order_by_id(new_order.id, db)
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     # Copy Pizzas
     for pizza in copy_order.pizzas:
@@ -224,7 +225,7 @@ def create_order_beverage(
 
     beverage = beverage_crud.get_beverage_by_id(beverage_quantity.beverage_id, db)
     if not beverage:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     beverage_quantity_found = order_crud.get_beverage_quantity_by_id(order_id, beverage_quantity.beverage_id, db)
     if beverage_quantity_found:
@@ -258,7 +259,7 @@ def update_beverage_of_order(
     beverage_id = beverage_quantity.beverage_id
     order_beverage_quantity = order_crud.get_beverage_quantity_by_id(order_id, beverage_id, db)
     if not order_beverage_quantity:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
     new_quantity = beverage_quantity.quantity
     old_quantity = order_beverage_quantity.quantity
     # Change Stock if enough is available: change Amount is Previous - New
@@ -271,7 +272,7 @@ def update_beverage_of_order(
     if new_order_beverage_quantity:
         return new_order_beverage_quantity
     else:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
 
 @router.delete(
@@ -288,7 +289,7 @@ def delete_beverage_from_order(
 
     order_beverage = order_crud.get_beverage_quantity_by_id(order_id, beverage_id, db)
     if not order_beverage:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
     # Increase Stock by the quantity of the deleted order
     order_quantity = order_beverage.quantity
     stock_beverage_crud.change_stock_of_beverage(beverage_id, order_quantity, db)
