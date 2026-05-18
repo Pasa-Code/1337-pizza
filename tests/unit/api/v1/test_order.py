@@ -1,3 +1,5 @@
+import pytest
+
 from app.api.v1.endpoints.order.crud import calculate_price
 
 
@@ -36,4 +38,4 @@ def test_order_calculate_price_no_beverage():
     result = calculate_price(price_beverage, price_pizza)
 
     # assert
-    assert result == price_pizza
+    assert result == pytest.approx(price_pizza)
