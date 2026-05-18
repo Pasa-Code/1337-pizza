@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import app.api.v1.endpoints.dough.crud as dough_crud
 from app.api.v1.endpoints.dough.schemas import DoughSchema, DoughCreateSchema, DoughListItemSchema
 from app.database.connection import SessionLocal
+from app.api.v1.constants import NOT_FOUND_ERROR_OUTPUT
 
 router = APIRouter()
 
@@ -60,7 +61,7 @@ def update_dough(
                 updated_dough = dough_crud.create_dough(changed_dough, db)
                 response.status_code = status.HTTP_201_CREATED
     else:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     return updated_dough
 
@@ -72,7 +73,7 @@ def get_dough(dough_id: uuid.UUID,
     dough = dough_crud.get_dough_by_id(dough_id, db)
 
     if not dough:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
     return dough
 
 
@@ -81,7 +82,7 @@ def delete_dough(dough_id: uuid.UUID, db: Annotated[Session, Depends(get_db)]):
     dough = dough_crud.get_dough_by_id(dough_id, db)
 
     if not dough:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     dough_crud.delete_dough_by_id(dough_id, db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

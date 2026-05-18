@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import app.api.v1.endpoints.topping.crud as topping_crud
 from app.api.v1.endpoints.topping.schemas import ToppingSchema, ToppingCreateSchema, ToppingListItemSchema
 from app.database.connection import SessionLocal
+from app.api.v1.constants import NOT_FOUND_ERROR_OUTPUT
 
 router = APIRouter()
 
@@ -62,7 +63,7 @@ def update_topping(
                 updated_topping = topping_crud.create_topping(changed_topping, db)
                 response.status_code = status.HTTP_201_CREATED
     else:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     return updated_topping
 
@@ -75,7 +76,7 @@ def get_topping(topping_id: uuid.UUID,
     topping = topping_crud.get_topping_by_id(topping_id, db)
 
     if not topping:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     return topping
 
@@ -85,7 +86,7 @@ def delete_topping(topping_id: uuid.UUID, db: Annotated[Session, Depends(get_db)
     topping = topping_crud.get_topping_by_id(topping_id, db)
 
     if not topping:
-        raise HTTPException(status_code=404, detail='Item not found')
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     topping_crud.delete_topping_by_id(topping_id, db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

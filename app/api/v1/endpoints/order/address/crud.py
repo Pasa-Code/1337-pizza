@@ -20,7 +20,7 @@ def get_address_by_id(address_id: uuid.UUID, db: Session):
 
 
 def delete_address_by_id(address_id: uuid.UUID, db: Session):
-    entity = get_address_by_id(address_id)
+    entity = get_address_by_id(address_id,db)
     if entity:
         db.delete(entity)
         db.commit()

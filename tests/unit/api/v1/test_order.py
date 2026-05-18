@@ -10,9 +10,7 @@ def test_order_calculate_price_pizza_and_beverage():
     # act
     result = calculate_price(price_beverage, price_pizza)
 
-    # Product-Owner just called ... can't think
-    # about this right now ...
-    # TODO: write correct ASSERT
+
     assert result == price_total
 
 
