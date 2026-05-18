@@ -52,7 +52,7 @@ The following is a collection of short hints on how to do the most essential thi
     Go to the pipeline page, find the task in the "Stage" tab and click the "Run" button.
 - The Script part of the config file - what is it good for?
     It is a list of commands that will be executed - could be used to output useful info (for example, Kubernetes Dashboard link, as showcased in this repo in print_readme job).
-- If I want a task to run for every branch I put it into the stage ??:
+- If I want a task to run for every branch I put it into the stage ??check:
     commit
 - If I want a task to run for every merge request I put it into the stage ??:
     acceptance
