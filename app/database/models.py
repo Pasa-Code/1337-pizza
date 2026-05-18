@@ -8,6 +8,7 @@ from sqlalchemy import CheckConstraint, ForeignKey, Integer, Numeric, DateTime, 
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from sqlalchemy.sql import func
 
+STOCK_CHECK = 'stock >= 0'
 
 class Base(DeclarativeBase):
     pass
@@ -68,7 +69,7 @@ class Topping(Base):
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
     price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     description: Mapped[str] = mapped_column(nullable=False, default='')
-    stock: Mapped[int] = mapped_column(CheckConstraint('stock >= 0'), nullable=False)
+    stock: Mapped[int] = mapped_column(CheckConstraint(STOCK_CHECK), nullable=False)
 
     def __repr__(self):
         return "Topping(id='%s', name='%s', price='%s', description='%s', stock='%s')" \
@@ -82,7 +83,7 @@ class Dough(Base):
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
     price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     description: Mapped[str] = mapped_column(nullable=False, default='')
-    stock: Mapped[int] = mapped_column(CheckConstraint('stock >= 0'), nullable=False)
+    stock: Mapped[int] = mapped_column(CheckConstraint(STOCK_CHECK), nullable=False)
 
     def __repr__(self):
         return "Dough(id='%s', name='%s', price='%s', description='%s', stock='%s')" \
@@ -142,7 +143,7 @@ class Beverage(Base):
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
     price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     description: Mapped[str] = mapped_column(nullable=False, default='')
-    stock: Mapped[int] = mapped_column(CheckConstraint('stock >= 0'), nullable=False)
+    stock: Mapped[int] = mapped_column(CheckConstraint(STOCK_CHECK), nullable=False)
 
     def __repr__(self):
         return "Beverage(id='%s', name='%s', price='%s', description='%s', stock='%s')" \
