@@ -10,7 +10,7 @@ def user_dict():
     return {
         'id': uuid.uuid4(),
         'username': 'stjaklar',
-        'password': 's4v3Passw0rd',
+        'password': 's4v3Passw0rd',   #NOSONAR
     }
 
 
