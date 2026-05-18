@@ -45,27 +45,27 @@ Alembic allows the scripts to execute in some sequential manner.
 The following is a collection of short hints on how to do the most essential things in a GitLab CI/CD pipeline:
 
 - How to delay a job until another job is done: 
-
+    Use `needs` to define a dependency job. Alternatively, define a `stage` - jobs in a later stage run only after all the jobs in the earlier stage are done.
 - How to change the image used in a task: 
-    
+    Change the `image` to `<imagename>:<tag>`. Using `latest` as a tag is possible, but hurts reproduceability.
 - How do you start a task manually:
-
+    Go to the pipeline page, find the task in the "Stage" tab and click the "Run" button.
 - The Script part of the config file - what is it good for?
-
-- If I want a task to run for every branch I put it into the stage ??
-
-- If I want a task to run for every merge request I put it into the stage ??
-
-- If I want a task to run for every commit to the main branch I put it into the stage ??
-
+    It is a list of commands that will be executed - could be used to output useful info (for example, Kubernetes Dashboard link, as showcased in this repo in print_readme job).
+- If I want a task to run for every branch I put it into the stage ??:
+    commit
+- If I want a task to run for every merge request I put it into the stage ??:
+    acceptance
+- If I want a task to run for every commit to the main branch I put it into the stage ??:
+    release
 # Ruff
 
 - What is the purpose of ruff?
-
-- What types of problems does it detect
-
+    Ruff is a linter and a static code analysis tool, performing linting and code formatting. In our project, we run it via the ruff_checking job, linting everything in app/ and tests/.
+- What types of problems does it detect?
+    It ensures that code follows conventions, checks for potential errors (without actually running the code), and even checks for potential security vulnerabilities.
 - Why should you use a tool like ruff in a serious project?
-
+    It helps to ensure code quality, simplifies code review and establishes a formatting standard - all automatically.
 ## Run ruff on your local Computer
 
   It is very annoying (and takes a lot of time) to wait for the pipeline to check the syntax 
