@@ -20,7 +20,8 @@ def test_beverage_create_read_delete(db):
     new_beverage = BeverageCreateSchema(
         name='Cognac',
         price=3.99,
-        description='A sweet and strongly alcoholic drink, twice distilled and left to mature for several years. Classy as fornication.',
+        description='A sweet and strongly alcoholic drink, twice distilled and left to mature for several years. '
+                    'Classy as fornication.',
         stock=1
     )
 
