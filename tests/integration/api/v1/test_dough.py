@@ -27,7 +27,7 @@ def test_dough_create_read_delete(db):
             created_dough_id = db_dough.id
             all_doughs = dough_crud.get_all_doughs(db)
             assert len(all_doughs) == len_dough_before + 1
-            read_dough = dough_crud.get_dough_by_id(db)
+            read_dough = dough_crud.get_dough_by_id(created_dough_id,db)
             assert read_dough.id == created_dough_id
             assert read_dough.name == 'awesome dough'
             assert read_dough.description == 'awesome description'
