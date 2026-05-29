@@ -109,11 +109,11 @@ If you like it convenient: Add a button for ruff to your toolbar!
 # SonarQube
 
 - What is the purpose of SonarQube?
-
+    SonarQube is a static code analysis plus code quality analysis tool. It supports many programming languages (unlike Ruff) and also has some useful extra features that we use for this project (quality gates, hosted website with issues overview).
 - What is the purpose of the quality rules of SonarQube?
-
+    Three qualities (security, reliability, and maintainability) with the severity allow to determine the urgency of an issue, should it delay the release cycle, and the potential consequences if the issue remains unresolved.
 - What is the purpose of the quality gates of SonarQube?
-
+    Quality gates are a simple pass/fail system mainly for CI - it determines if the code is "good enough" based on the amount and severity of found issues, test coverage and other metrics. It can be viewed both for the main branch and for pull request branches.
 
 ## Run SonarLint on your local Computer
 
