@@ -9,6 +9,14 @@ variables:
   DEVELOPMENT_CONTAINER_TAG: "${CI_COMMIT_BRANCH}_${CI_COMMIT_SHORT_SHA}"
   RELEASE_CONTAINER_NAME: 'release-container'
   RELEASE_CONTAINER_TAG: "${CI_COMMIT_BRANCH}_${CI_COMMIT_SHORT_SHA}"
+  DATABASE_HOST: db-dev # Should be the same name as the 'alias' in the service section
+  DATABASE_PORT: 5432
+  DATABASE_USERNAME: postgres
+  DATABASE_PASSWORD: mysecretpassword
+  DATABASE_NAME: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: mysecretpassword
+  POSTGRES_DB: postgres
 
 include:
   - component: $CI_SERVER_FQDN/its/templates-and-utilities/gitlab-ci-components/build-container-image/build-container-image@3
