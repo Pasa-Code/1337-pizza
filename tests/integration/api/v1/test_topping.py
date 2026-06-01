@@ -35,7 +35,7 @@ def test_topping_create_read_delete(db):
     assert read_topping.name == new_topping_name
     assert read_topping.price == Decimal('1.50')
     assert read_topping.description == 'test description'
-    assert read_topping.stock == 10
+    assert read_topping.stock == topping.stock
 
     topping_crud.delete_topping_by_id(created_topping_id, db)
     toppings = topping_crud.get_all_toppings(db)
