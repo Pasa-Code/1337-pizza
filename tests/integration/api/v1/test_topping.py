@@ -1,5 +1,3 @@
-
-
 import pytest
 from decimal import Decimal
 import app.api.v1.endpoints.topping.crud as topping_crud
@@ -20,8 +18,8 @@ def test_topping_create_read_delete(db):
 
     topping = topping_schemas.ToppingCreateSchema(
         name=new_topping_name,
-        price= Decimal("1.50"),
-        description="test description",
+        price=1.50,
+        description='test description',
         stock=10
     )
 
@@ -35,8 +33,8 @@ def test_topping_create_read_delete(db):
 
     assert read_topping.id == created_topping_id
     assert read_topping.name == new_topping_name
-    assert read_topping.price == Decimal("1.50")
-    assert read_topping.description == "test description"
+    assert read_topping.price == Decimal('1.50')
+    assert read_topping.description == 'test description'
     assert read_topping.stock == 10
 
     topping_crud.delete_topping_by_id(created_topping_id, db)
