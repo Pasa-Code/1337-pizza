@@ -96,6 +96,31 @@ sonarqube-check:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
 
+integration_testing:
+  stage: commit
+  image:
+    name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
+    entrypoint: [ "" ]
+  variables:
+    GIT_DEPTH: 1
+  services:
+    - name: postgres:15.0-alpine
+      alias: db-dev
+  before_script: 
+    - PYTHONPATH=. alembic upgrade head
+  script:
+    - PYTHONPATH=. pytest -x --junitxml=report_integration_tests.xml tests/integration/
+  allow_failure: true
+  artifacts:
+    reports:
+      junit: report_integration_tests.xml
+  rules:
+    - if: $CI_COMMIT_BRANCH                            # branch pipelines
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
 create_release_candidate:
   variables:
     GIT_DEPTH: 1
