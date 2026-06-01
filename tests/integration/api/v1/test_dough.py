@@ -1,4 +1,4 @@
-from unicodedata import decimal
+from decimal import Decimal
 import pytest
 
 
@@ -31,7 +31,7 @@ def test_dough_create_read_delete(db):
             assert read_dough.id == created_dough_id
             assert read_dough.name == 'awesome dough'
             assert read_dough.description == 'awesome description'
-            assert read_dough.price == decimal(4.99)
+            assert read_dough.price == Decimal('4.99')
             assert read_dough.stock == 1
 
             dough_crud.delete_dough_by_id(created_dough_id,db)
