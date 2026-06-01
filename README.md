@@ -6,6 +6,8 @@ sort: title asc
 display: table
 ```
 
+![coverage](https://code.fbi.h-da.de/software-engineering-student-projects/se/26SS/Girschick-Mo3-Green/badges/main/coverage.svg)
+
 # **1337 Pizza** - Pizza Delivery for Your *Nerdy* Needs
 
 **1337 Pizza** is a pizza delivery company, that has specialized on the needs of nerds.

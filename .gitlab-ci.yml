@@ -89,6 +89,13 @@ sonarqube-check:
       - .sonar/cache
   script:
     - sonar-scanner
+  needs:
+    - integration_testing
+  after_script:
+    - |
+      curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/measures/component?component=1337_Pizza&metricKeys=coverage" \
+      | sed -n 's/.*"metric":"coverage","value":"\([0-9]\+\(\.[0-9]\+\)\?\)".*/Coverage: \1/p'
+  coverage: '/Coverage:\s+([0-9]+\.[0-9]+)/'
   allow_failure: true
   rules:
     - if: $CI_COMMIT_BRANCH
@@ -117,11 +124,13 @@ integration_testing:
   before_script: 
     - PYTHONPATH=. alembic upgrade head
   script:
-    - PYTHONPATH=. pytest -x --junitxml=report_integration_tests.xml tests/integration/
+    - PYTHONPATH=. pytest -x --junitxml=report_integration_tests.xml --cov=app --cov-config=.coveragerc --cov-report=xml:integration_coverage.xml tests/integration/
   allow_failure: true
   artifacts:
     reports:
       junit: report_integration_tests.xml
+    paths:
+      - integration_coverage.xml
   needs:
     - create_development_container_image
   rules:
