@@ -29,7 +29,8 @@ def db():
     finally:
         db.close()
 
-
+INITIAL_STOCK = 5
+UPDATED_STOCK = 7
 def test_beverage_create_read_delete(db):
     # Anzahl vor dem Anlegen merken
     len_before = len(beverage_crud.get_all_beverages(db))
@@ -56,7 +57,7 @@ def test_beverage_create_read_delete(db):
     assert read_by_id.name == 'Cola Zero'
     assert read_by_id.description == 'Zuckerfreie Cola'
     assert read_by_id.price == Decimal('1.99')
-    assert read_by_id.stock == 5
+    assert read_by_id.stock == INITIAL_STOCK
 
     # READ: by name
     read_by_name = beverage_crud.get_beverage_by_name('Cola Zero', db)
@@ -98,7 +99,7 @@ def test_beverage_update(db):
     assert updated.name == 'Fanta Exotic'
     assert updated.description == 'Exotic Limo'
     assert updated.price == Decimal('1.79')
-    assert updated.stock == 7
+    assert updated.stock == UPDATED_STOCK
 
 
     beverage_crud.delete_beverage_by_id(beverage_id, db)

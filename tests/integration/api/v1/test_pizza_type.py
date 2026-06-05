@@ -1,4 +1,3 @@
-import uuid
 import pytest
 from decimal import Decimal
 
@@ -149,9 +148,9 @@ def test_pizza_type_topping_quantity(db, test_dough, test_topping):
         ),
         db,
     )
-
+    EXPECTED_TOPPING_QUANTITY = 3
     # Assert: Topping korrekt gespeichert
-    assert topping_quantity.quantity == 3
+    assert topping_quantity.quantity == EXPECTED_TOPPING_QUANTITY
     assert topping_quantity.topping_id == test_topping.id
 
     # Act: Topping per ID lesen
@@ -161,7 +160,7 @@ def test_pizza_type_topping_quantity(db, test_dough, test_topping):
         db,
     )
     assert read_topping_qty is not None
-    assert read_topping_qty.quantity == 3
+    assert read_topping_qty.quantity == EXPECTED_TOPPING_QUANTITY
 
     # Act: alle Toppings des PizzaTypes lesen
     all_toppings = pizza_type_crud.get_joined_topping_quantities_by_pizza_type(
