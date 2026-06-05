@@ -24,7 +24,6 @@ def db():
     finally:
         db.close()
 
-# ruff: disable[PLR0915]
 def test_order_create_read_delete(db):
     len_order_before = len(order_crud.get_all_orders(db))
     len_addresses_before = len(address_crud.get_all_addresses(db))
@@ -109,7 +108,7 @@ def test_order_create_read_delete(db):
         beverage_id=created_beverage_id,
         quantity=10
     )
-    order_crud.create_beverage_quantity(db_order, new_beverage_quantity, db)
+    db_beverage_quantity = order_crud.create_beverage_quantity(db_order, new_beverage_quantity, db)
     read_beverage_quantity = order_crud.get_beverage_quantity_by_id(created_order_id, created_beverage_id, db)
     assert read_beverage_quantity.beverage_id == created_beverage_id
     assert read_beverage_quantity.quantity == new_beverage_quantity.quantity
@@ -135,5 +134,3 @@ def test_order_create_read_delete(db):
     deleted_order = order_crud.get_order_by_id(created_order_id, db)
     assert len(orders) == len_order_before
     assert deleted_order is None
-
-# ruff: enable[PLR0915]
