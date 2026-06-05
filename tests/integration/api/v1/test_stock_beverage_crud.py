@@ -1,4 +1,4 @@
-# tests/integration/api/v1/test_stock_beverage_logic.py
+# tests/integration/api/v1/test_stock_beverage_crud.py
 
 import uuid
 from decimal import Decimal
@@ -12,20 +12,21 @@ from app.api.v1.endpoints.order.stock_logic.stock_beverage_crud import (
     change_stock_of_beverage,
 )
 
-
+#unique_name ist dafür da das sich die namen nicht überscheiden damit jeder name unique ist. Grund: Test schlug fehl weil die namen schon existierten.
 @pytest.fixture(scope='module')
 def db():
-    db = SessionLocal()
+    session = SessionLocal()
     try:
-        yield db
+        yield session
     finally:
-        db.close()
+        session.close()
 
 
 def test_beverage_is_available_true(db):
+    unique_name = f'Available Drink {uuid.uuid4()}'
     bev = Beverage(
         id=uuid.uuid4(),
-        name='Available Drink',
+        name=unique_name,
         price=Decimal('1.99'),
         description='enough stock',
         stock=10,
@@ -40,9 +41,10 @@ def test_beverage_is_available_true(db):
 
 
 def test_beverage_is_available_false_not_enough_stock(db):
+    unique_name = f'Low Stock Drink {uuid.uuid4()}'
     bev = Beverage(
         id=uuid.uuid4(),
-        name='Low Stock Drink',
+        name=unique_name,
         price=Decimal('0.99'),
         description='low stock',
         stock=2,
@@ -65,9 +67,11 @@ def test_beverage_is_available_false_not_existing(db):
 
 
 def test_change_stock_of_beverage_increase(db):
+    expected_stock = 8
+    unique_name = f'Increase Stock {uuid.uuid4()}'
     bev = Beverage(
         id=uuid.uuid4(),
-        name='Increase Stock',
+        name=unique_name,
         price=Decimal('2.49'),
         description='increase',
         stock=5,
@@ -80,13 +84,14 @@ def test_change_stock_of_beverage_increase(db):
     db.refresh(bev)
 
     assert ok is True
-    assert bev.stock == 8
+    assert bev.stock == expected_stock
 
 
 def test_change_stock_of_beverage_decrease_to_zero(db):
+    unique_name = f'Decrease To Zero {uuid.uuid4()}'
     bev = Beverage(
         id=uuid.uuid4(),
-        name='Decrease To Zero',
+        name=unique_name,
         price=Decimal('1.50'),
         description='dec to zero',
         stock=3,
@@ -103,9 +108,11 @@ def test_change_stock_of_beverage_decrease_to_zero(db):
 
 
 def test_change_stock_of_beverage_prevent_negative(db):
+    expected_stock = 2
+    unique_name = f'Prevent Negative {uuid.uuid4()}'
     bev = Beverage(
         id=uuid.uuid4(),
-        name='Prevent Negative',
+        name=unique_name,
         price=Decimal('1.20'),
         description='neg',
         stock=2,
@@ -118,7 +125,7 @@ def test_change_stock_of_beverage_prevent_negative(db):
     db.refresh(bev)
 
     assert ok is False
-    assert bev.stock == 2
+    assert bev.stock == expected_stock
 
 
 def test_change_stock_of_beverage_not_existing(db):
