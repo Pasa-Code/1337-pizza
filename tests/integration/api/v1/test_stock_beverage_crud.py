@@ -1,5 +1,3 @@
-# tests/integration/api/v1/test_stock_beverage_crud.py
-
 import uuid
 from decimal import Decimal
 
