@@ -1,11 +1,19 @@
 import pytest
+from decimal import Decimal
 
 import app.api.v1.endpoints.order.crud as order_crud
 import app.api.v1.endpoints.order.address.crud as address_crud
 import app.api.v1.endpoints.user.crud as user_crud
-from app.api.v1.endpoints.order.schemas import OrderCreateSchema
+import app.api.v1.endpoints.pizza_type.crud as pizzatype_crud
+import app.api.v1.endpoints.dough.crud as dough_crud
+import app.api.v1.endpoints.beverage.crud as beverage_crud
+from app.api.v1.endpoints.order.schemas import OrderCreateSchema, OrderBeverageQuantityCreateSchema
 from app.api.v1.endpoints.order.address.schemas import AddressCreateSchema
 from app.api.v1.endpoints.user.schemas import UserCreateSchema
+from app.api.v1.endpoints.pizza_type.schemas import PizzaTypeCreateSchema
+from app.api.v1.endpoints.dough.schemas import DoughCreateSchema
+from app.api.v1.endpoints.beverage.schemas import BeverageCreateSchema
+from app.database.models import OrderStatus
 from app.database.connection import SessionLocal
 
 @pytest.fixture(scope='module')
@@ -64,6 +72,62 @@ def test_order_create_read_delete(db):
     read_order = order_crud.get_order_by_id(created_order_id, db)
     assert read_order.id == created_order_id
     assert read_order.user_id == new_order.user_id
+
+    order_crud.update_order_status(db_order, OrderStatus.COMPLETED, db)
+    read_order = order_crud.get_order_by_id(created_order_id, db)
+    assert read_order.order_status == OrderStatus.COMPLETED
+
+    new_dough = DoughCreateSchema(
+        name='Dough',
+        price=5,
+        description='Description',
+        stock=1
+    )
+    db_dough = dough_crud.create_dough(new_dough, db)
+    created_dough_id = db_dough.id
+    new_pizzatype = PizzaTypeCreateSchema(
+        name='Pizza',
+        price=10,
+        description='Description',
+        dough_id=created_dough_id
+    )
+    db_pizzatype = pizzatype_crud.create_pizza_type(new_pizzatype, db)
+    created_pizza = order_crud.add_pizza_to_order(db_order, db_pizzatype, db)
+    created_pizza_id = created_pizza.id
+    assert len(order_crud.get_all_pizzas_of_order(db_order, db)) == 1
+
+    new_beverage = BeverageCreateSchema(
+        name='Beer',
+        price=5,
+        description='i drank a beer',
+        stock=10
+    )
+    db_beverage = beverage_crud.create_beverage(new_beverage, db)
+    created_beverage_id = db_beverage.id
+    new_beverage_quantity = OrderBeverageQuantityCreateSchema(
+        beverage_id=created_beverage_id,
+        quantity=10
+    )
+    db_beverage_quantity = order_crud.create_beverage_quantity(db_order, new_beverage_quantity, db)
+    read_beverage_quantity = order_crud.get_beverage_quantity_by_id(created_order_id, created_beverage_id, db)
+    assert read_beverage_quantity.beverage_id == created_beverage_id
+    assert read_beverage_quantity.quantity == new_beverage_quantity.quantity
+    order_crud.update_beverage_quantity_of_order(created_order_id, created_beverage_id,
+                                                 2*new_beverage_quantity.quantity,
+                                                 db)
+    read_beverage_quantity = order_crud.get_beverage_quantity_by_id(created_order_id, created_beverage_id, db)
+    assert read_beverage_quantity.quantity == 2*new_beverage_quantity.quantity
+
+    beverage_price = order_crud.get_price_of_beverage_in_order(created_order_id, db)
+    pizza_price = order_crud.get_price_of_pizza_in_order(created_order_id, db)
+    order_price = order_crud.get_price_of_order(created_order_id, db)
+    assert beverage_price == Decimal('100')
+    assert pizza_price == Decimal('10')
+    assert order_price == Decimal('110')
+
+    order_crud.delete_pizza_from_order(db_order, created_pizza_id, db)
+    read_pizza = order_crud.get_pizza_by_id(created_pizza_id, db)
+    assert read_pizza is None
 
     order_crud.delete_order_by_id(created_order_id, db)
     orders = order_crud.get_all_orders(db)
