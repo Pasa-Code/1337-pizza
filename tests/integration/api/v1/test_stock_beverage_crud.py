@@ -12,7 +12,8 @@ from app.api.v1.endpoints.order.stock_logic.stock_beverage_crud import (
     change_stock_of_beverage,
 )
 
-#unique_name ist dafür da das sich die namen nicht überscheiden damit jeder name unique ist. Grund: Test schlug fehl weil die namen schon existierten.
+#unique_name ist dafür da das sich die namen nicht überscheiden damit jeder name unique ist.
+# Grund: Test schlug fehl weil die namen schon existierten.
 @pytest.fixture(scope='module')
 def db():
     session = SessionLocal()
