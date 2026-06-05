@@ -1,24 +1,16 @@
-# tests/integration/api/v1/test_beverage_crud.py
-import pathlib
-import subprocess
+# tests/integration/api/v1/test_stock_beverage_logic.py
+
 import uuid
 from decimal import Decimal
 
 import pytest
 
 from app.database.connection import SessionLocal
-
-import app.api.v1.endpoints.beverage.crud as beverage_crud
-from app.api.v1.endpoints.beverage.schemas import BeverageCreateSchema
-
-@pytest.fixture(scope='session', autouse=True)
-def setup_database():
-    base_path = pathlib.Path(__file__).resolve()
-    project_root = base_path.parents[4]
-    subprocess.run(['alembic', 'upgrade', 'head'], cwd=project_root, check=True)
-
-
-    yield
+from app.database.models import Beverage
+from app.api.v1.endpoints.order.stock_logic.stock_beverage_crud import (
+    beverage_is_available,
+    change_stock_of_beverage,
+)
 
 
 @pytest.fixture(scope='module')
@@ -29,93 +21,109 @@ def db():
     finally:
         db.close()
 
-INITIAL_STOCK = 5
-UPDATED_STOCK = 7
-def test_beverage_create_read_delete(db):
-    # Anzahl vor dem Anlegen merken
-    len_before = len(beverage_crud.get_all_beverages(db))
 
-    new_beverage = BeverageCreateSchema(
-        name='Cola Zero',
+def test_beverage_is_available_true(db):
+    bev = Beverage(
+        id=uuid.uuid4(),
+        name='Available Drink',
         price=Decimal('1.99'),
-        description='Zuckerfreie Cola',
-        stock=5,
-    )
-
-    # CREATE
-    db_beverage = beverage_crud.create_beverage(new_beverage, db)
-    created_id = db_beverage.id
-
-    # READ: alle
-    all_beverages = beverage_crud.get_all_beverages(db)
-    assert len(all_beverages) == len_before + 1
-
-    # READ: by id
-    read_by_id = beverage_crud.get_beverage_by_id(created_id, db)
-    assert read_by_id is not None
-    assert read_by_id.id == created_id
-    assert read_by_id.name == 'Cola Zero'
-    assert read_by_id.description == 'Zuckerfreie Cola'
-    assert read_by_id.price == Decimal('1.99')
-    assert read_by_id.stock == INITIAL_STOCK
-
-    # READ: by name
-    read_by_name = beverage_crud.get_beverage_by_name('Cola Zero', db)
-    assert read_by_name is not None
-    assert read_by_name.id == created_id
-
-    # DELETE
-    beverage_crud.delete_beverage_by_id(created_id, db)
-
-    all_after_delete = beverage_crud.get_all_beverages(db)
-    assert len(all_after_delete) == len_before
-
-    # sollte nach dem löschen nicht gefunden werden
-    deleted = beverage_crud.get_beverage_by_id(created_id, db)
-    assert deleted is None
-
-
-def test_beverage_update(db):
-    create_schema = BeverageCreateSchema(
-        name='Fanta Orange',
-        price=Decimal('1.49'),
-        description='Orangenlimonade',
+        description='enough stock',
         stock=10,
     )
-    db_beverage = beverage_crud.create_beverage(create_schema, db)
-    beverage_id = db_beverage.id
+    db.add(bev)
+    db.commit()
+    db.refresh(bev)
+
+    result = beverage_is_available(bev.id, amount=5, db=db)
+
+    assert result is True
 
 
-    update_schema = BeverageCreateSchema(
-        name='Fanta Exotic',
-        price=Decimal('1.79'),
-        description='Exotic Limo',
-        stock=7,
+def test_beverage_is_available_false_not_enough_stock(db):
+    bev = Beverage(
+        id=uuid.uuid4(),
+        name='Low Stock Drink',
+        price=Decimal('0.99'),
+        description='low stock',
+        stock=2,
     )
+    db.add(bev)
+    db.commit()
+    db.refresh(bev)
 
-    updated = beverage_crud.update_beverage(db_beverage, update_schema, db)
+    result = beverage_is_available(bev.id, amount=5, db=db)
 
-    assert updated.id == beverage_id
-    assert updated.name == 'Fanta Exotic'
-    assert updated.description == 'Exotic Limo'
-    assert updated.price == Decimal('1.79')
-    assert updated.stock == UPDATED_STOCK
-
-
-    beverage_crud.delete_beverage_by_id(beverage_id, db)
+    assert result is False
 
 
-def test_get_beverage_by_name_not_existing(db):
-    result = beverage_crud.get_beverage_by_name('NameDenEsNichtGibt', db)
-    assert result is None
-
-
-def test_delete_beverage_by_id_not_existing(db):
+def test_beverage_is_available_false_not_existing(db):
     random_id = uuid.uuid4()
 
-    len_before = len(beverage_crud.get_all_beverages(db))
+    result = beverage_is_available(random_id, amount=1, db=db)
 
-    beverage_crud.delete_beverage_by_id(random_id, db)
+    assert result is False
 
-    len_after = len(beverage_crud.get_all_beverages(db))
-    assert len_before == len_after
+
+def test_change_stock_of_beverage_increase(db):
+    bev = Beverage(
+        id=uuid.uuid4(),
+        name='Increase Stock',
+        price=Decimal('2.49'),
+        description='increase',
+        stock=5,
+    )
+    db.add(bev)
+    db.commit()
+    db.refresh(bev)
+
+    ok = change_stock_of_beverage(bev.id, change_amount=3, db=db)
+    db.refresh(bev)
+
+    assert ok is True
+    assert bev.stock == 8
+
+
+def test_change_stock_of_beverage_decrease_to_zero(db):
+    bev = Beverage(
+        id=uuid.uuid4(),
+        name='Decrease To Zero',
+        price=Decimal('1.50'),
+        description='dec to zero',
+        stock=3,
+    )
+    db.add(bev)
+    db.commit()
+    db.refresh(bev)
+
+    ok = change_stock_of_beverage(bev.id, change_amount=-3, db=db)
+    db.refresh(bev)
+
+    assert ok is True
+    assert bev.stock == 0
+
+
+def test_change_stock_of_beverage_prevent_negative(db):
+    bev = Beverage(
+        id=uuid.uuid4(),
+        name='Prevent Negative',
+        price=Decimal('1.20'),
+        description='neg',
+        stock=2,
+    )
+    db.add(bev)
+    db.commit()
+    db.refresh(bev)
+
+    ok = change_stock_of_beverage(bev.id, change_amount=-3, db=db)
+    db.refresh(bev)
+
+    assert ok is False
+    assert bev.stock == 2
+
+
+def test_change_stock_of_beverage_not_existing(db):
+    random_id = uuid.uuid4()
+
+    ok = change_stock_of_beverage(random_id, change_amount=5, db=db)
+
+    assert ok is False
