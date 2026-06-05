@@ -96,6 +96,44 @@ def test_order_create_read_delete(db):
     created_pizza_id = created_pizza.id
     assert len(order_crud.get_all_pizzas_of_order(db_order, db)) == 1
 
+    pizza_price = order_crud.get_price_of_pizza_in_order(created_order_id, db)
+    assert pizza_price == Decimal('10')
+
+    order_crud.delete_pizza_from_order(db_order, created_pizza_id, db)
+    read_pizza = order_crud.get_pizza_by_id(created_pizza_id, db)
+    assert read_pizza is None
+
+    order_crud.delete_order_by_id(created_order_id, db)
+    orders = order_crud.get_all_orders(db)
+    deleted_order = order_crud.get_order_by_id(created_order_id, db)
+    assert len(orders) == len_order_before
+    assert deleted_order is None
+
+def test_order_beverage_quantities(db):
+    new_address = AddressCreateSchema(
+        street='abc',
+        post_code='133787',
+        house_number=3,
+        country='def',
+        town='ghi',
+        first_name='eee',
+        last_name='bbb'
+    )
+    address_crud.create_address(new_address, db)
+
+    new_user = UserCreateSchema(
+        username='testuser'
+    )
+    db_user = user_crud.create_user(new_user, db)
+    user_id = db_user.id
+    new_order = OrderCreateSchema(
+        address=new_address,
+        user_id=user_id,
+    )
+
+    db_order = order_crud.create_order(new_order, db)
+    created_order_id = db_order.id
+
     new_beverage = BeverageCreateSchema(
         name='Beer',
         price=5,
@@ -108,29 +146,19 @@ def test_order_create_read_delete(db):
         beverage_id=created_beverage_id,
         quantity=10
     )
-    db_beverage_quantity = order_crud.create_beverage_quantity(db_order, new_beverage_quantity, db)
+    order_crud.create_beverage_quantity(db_order, new_beverage_quantity, db)
     read_beverage_quantity = order_crud.get_beverage_quantity_by_id(created_order_id, created_beverage_id, db)
     assert read_beverage_quantity.beverage_id == created_beverage_id
     assert read_beverage_quantity.quantity == new_beverage_quantity.quantity
     order_crud.update_beverage_quantity_of_order(created_order_id, created_beverage_id,
-                                                 2*new_beverage_quantity.quantity,
+                                                 2 * new_beverage_quantity.quantity,
                                                  db)
     read_beverage_quantity = order_crud.get_beverage_quantity_by_id(created_order_id, created_beverage_id, db)
-    assert read_beverage_quantity.quantity == 2*new_beverage_quantity.quantity
+    assert read_beverage_quantity.quantity == 2 * new_beverage_quantity.quantity
 
     beverage_price = order_crud.get_price_of_beverage_in_order(created_order_id, db)
     pizza_price = order_crud.get_price_of_pizza_in_order(created_order_id, db)
     order_price = order_crud.get_price_of_order(created_order_id, db)
     assert beverage_price == Decimal('100')
-    assert pizza_price == Decimal('10')
-    assert order_price == Decimal('110')
-
-    order_crud.delete_pizza_from_order(db_order, created_pizza_id, db)
-    read_pizza = order_crud.get_pizza_by_id(created_pizza_id, db)
-    assert read_pizza is None
-
-    order_crud.delete_order_by_id(created_order_id, db)
-    orders = order_crud.get_all_orders(db)
-    deleted_order = order_crud.get_order_by_id(created_order_id, db)
-    assert len(orders) == len_order_before
-    assert deleted_order is None
+    assert pizza_price is None
+    assert order_price == Decimal('100')
