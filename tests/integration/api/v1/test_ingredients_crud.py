@@ -1,9 +1,7 @@
 import uuid
 from decimal import Decimal
-from enum import unique
 
 import pytest
-from sqlalchemy.ext.asyncio import session
 
 from app.database.connection import SessionLocal
 from app.database.models import PizzaType,Dough,Topping,PizzaTypeToppingQuantity
