@@ -203,7 +203,7 @@ service_testing:
     name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
     entrypoint: [""]
   needs:
-    - deploy_application_to_staging
+    - migrate_database_in_staging
   variables:
     API_SERVER: girschick-mo3-green.se-ss26.users.h-da.cloud # insert link to your API website without http:// e.g. girschick-mo1-gray.se-ss25.users.h-da.cloud
     API_PORT: 30080  # insert port of your API website
