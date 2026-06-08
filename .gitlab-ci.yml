@@ -197,6 +197,25 @@ smoke_testing_staging:
     - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
       when: never
 
+service_testing:
+  stage: acceptance
+  image: 
+    name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
+    entrypoint: [""]
+  needs:
+    - deploy_application_to_staging
+  variables:
+    API_SERVER: girschick-mo3-green.se-ss26.users.h-da.cloud # insert link to your API website without http:// e.g. girschick-mo1-gray.se-ss25.users.h-da.cloud
+    API_PORT: 30080  # insert port of your API website
+  script:
+    - PYTHONPATH=. pytest --verbose --color=yes --junitxml=report_service_tests.xml tests/service/
+  allow_failure: false
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
+    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
+      when: never
+
 migrate_database_in_staging:
   stage: acceptance
   needs:
