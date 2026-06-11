@@ -203,32 +203,13 @@ service_testing:
     name: $CI_REGISTRY_IMAGE/$DEVELOPMENT_CONTAINER_NAME:$DEVELOPMENT_CONTAINER_TAG
     entrypoint: [""]
   needs:
-    - truncate_staging_database
+    - migrate_database_in_staging
   variables:
     API_SERVER: girschick-mo3-green.se-ss26.users.h-da.cloud # insert link to your API website without http:// e.g. girschick-mo1-gray.se-ss25.users.h-da.cloud
     API_PORT: 30080  # insert port of your API website
   script:
     - PYTHONPATH=. pytest --verbose --color=yes --junitxml=report_service_tests.xml tests/service/
   allow_failure: false
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
-    - if: $CI_PIPELINE_SOURCE == "schedule"            # exclude scheduled pipelines
-      when: never
-
-truncate_staging_database:
-  stage: acceptance
-  image:
-    name: registry.code.fbi.h-da.de/software-engineering/containers/se-container-registry/dtzar/helm-kubectl:3.10.3
-    entrypoint: [ '' ]
-  needs:
-    - migrate_database_in_staging
-  variables:
-    GIT_DEPTH: 1
-  script:
-    - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l cnpg.io/cluster=database-staging -o custom-columns=":metadata.name"`
-    - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -c postgres -- sh -c 'psql -d se-lab -c "TRUNCATE TABLE customer_order, pizza_type_topping_quantity, order_beverage_quantity, pizza, pizza_type, topping, dough, beverage, \"user\", address RESTART IDENTITY CASCADE;"'
-    - rm final-kubeconfig
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
@@ -251,6 +232,8 @@ migrate_database_in_staging:
   script:
     - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l app=stagingcontainer -o custom-columns=":metadata.name"`
     - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -- env PYTHONPATH=. alembic upgrade head
+    - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l cnpg.io/cluster=database-staging -o custom-columns=":metadata.name"`
+    - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -c postgres -- sh -c 'psql -d se-lab -c "TRUNCATE TABLE customer_order, pizza_type_topping_quantity, order_beverage_quantity, pizza, pizza_type, topping, dough, beverage, \"user\", address RESTART IDENTITY CASCADE;"'
     - rm final-kubeconfig
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
