@@ -6,7 +6,7 @@ sort: title asc
 display: table
 ```
 
-![coverage](https://code.fbi.h-da.de/software-engineering-student-projects/se/26SS/Girschick-Mo3-Green/badges/main/coverage.svg?job=integration_testing)
+![coverage](https://code.fbi.h-da.de/software-engineering-student-projects/se/26SS/Girschick-Mo3-Green/badges/main/coverage.svg?job=sonarqube-check)
 
 # **1337 Pizza** - Pizza Delivery for Your *Nerdy* Needs
 
