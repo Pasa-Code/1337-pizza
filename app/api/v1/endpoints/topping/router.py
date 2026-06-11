@@ -3,6 +3,7 @@ from typing import List, Annotated
 
 from fastapi import APIRouter, Depends, Request, Response, status, HTTPException
 from sqlalchemy.orm import Session
+import logging
 
 import app.api.v1.endpoints.topping.crud as topping_crud
 from app.api.v1.endpoints.topping.schemas import ToppingSchema, ToppingCreateSchema, ToppingListItemSchema
@@ -34,6 +35,7 @@ def create_topping(topping: ToppingCreateSchema,
     topping_found = topping_crud.get_topping_by_name(topping.name, db)
 
     if topping_found:
+        logging.error('Tried to create a topping with name {}, but it already exists'.format(topping.name))
         raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
     new_topping = topping_crud.create_topping(topping, db)
@@ -58,11 +60,16 @@ def update_topping(
         else:
             topping_name_found = topping_crud.get_topping_by_name(changed_topping.name, db)
             if topping_name_found:
+                logging.error('Topping {} updated to an already existing name {}'
+                              .format(topping_id, changed_topping.name))
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT)
             else:
+                logging.info('Topping {} updated to a non-existing name {} - creating new topping'
+                             .format(topping_id, changed_topping.name))
                 updated_topping = topping_crud.create_topping(changed_topping, db)
                 response.status_code = status.HTTP_201_CREATED
     else:
+        logging.error('Tried to update topping {}, but it does not exist'.format(topping_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     return updated_topping
@@ -76,6 +83,7 @@ def get_topping(topping_id: uuid.UUID,
     topping = topping_crud.get_topping_by_id(topping_id, db)
 
     if not topping:
+        logging.error('Tried to get topping {}, but it does not exist'.format(topping_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     return topping
@@ -86,6 +94,7 @@ def delete_topping(topping_id: uuid.UUID, db: Annotated[Session, Depends(get_db)
     topping = topping_crud.get_topping_by_id(topping_id, db)
 
     if not topping:
+        logging.error('Tried to delete topping {}, but it does not exist'.format(topping_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     topping_crud.delete_topping_by_id(topping_id, db)

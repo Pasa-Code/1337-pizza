@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy.orm import Session
+import logging
 
 from app.api.v1.endpoints.topping.schemas import ToppingCreateSchema, ToppingListItemSchema
 from app.database.models import Topping
@@ -10,6 +11,7 @@ def create_topping(schema: ToppingCreateSchema, db: Session):
     entity = Topping(**schema.dict())
     db.add(entity)
     db.commit()
+    logging.info('Topping created with id {}'.format(entity.id))
     return entity
 
 
@@ -41,6 +43,12 @@ def update_topping(topping: Topping, changed_topping: ToppingCreateSchema, db: S
 
     db.commit()
     db.refresh(topping)
+    logging.info('Topping {} updated with values name:{}, price:{}, stock:{}, description:{}'
+                 .format(topping.id,
+                         changed_topping.name,
+                         changed_topping.price,
+                         changed_topping.stock,
+                         changed_topping.description))
     return topping
 
 
@@ -49,3 +57,4 @@ def delete_topping_by_id(topping_id: uuid.UUID, db: Session):
     if entity:
         db.delete(entity)
         db.commit()
+        logging.info('Topping with id {} has been deleted'.format(entity.id))
