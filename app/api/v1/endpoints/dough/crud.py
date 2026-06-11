@@ -1,4 +1,5 @@
 import uuid
+import logging
 
 from sqlalchemy.orm import Session
 
@@ -10,6 +11,7 @@ def create_dough(schema: DoughCreateSchema, db: Session):
     entity = Dough(**schema.dict())
     db.add(entity)
     db.commit()
+    logging.info('Dough created with name {}'.format(entity.name))
     return entity
 
 
@@ -33,6 +35,12 @@ def update_dough(dough: Dough, changed_dough: DoughCreateSchema, db: Session):
 
     db.commit()
     db.refresh(dough)
+    logging.info('Dough {} updated with values name:{}, price:{}, stock:{}, description:{}'
+                 .format(dough.id,
+                         changed_dough.name,
+                         changed_dough.price,
+                         changed_dough.stock,
+                         changed_dough.description))
     return dough
 
 
@@ -41,3 +49,4 @@ def delete_dough_by_id(dough_id: uuid.UUID, db: Session):
     if entity:
         db.delete(entity)
         db.commit()
+        logging.info('Dough with id {} has been deleted'.format(entity.id))
