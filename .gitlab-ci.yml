@@ -208,6 +208,9 @@ service_testing:
     API_SERVER: girschick-mo3-green.se-ss26.users.h-da.cloud # insert link to your API website without http:// e.g. girschick-mo1-gray.se-ss25.users.h-da.cloud
     API_PORT: 30080  # insert port of your API website
   script:
+    - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l cnpg.io/cluster=database-staging -o custom-columns=":metadata.name"`
+    - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -c postgres -- sh -c 'psql -d se-lab -c "TRUNCATE TABLE customer_order, pizza_type_topping_quantity, order_beverage_quantity, pizza, pizza_type, topping, dough, beverage, \"user\", address RESTART IDENTITY CASCADE;"'
+    - rm final-kubeconfig
     - PYTHONPATH=. pytest --verbose --color=yes --junitxml=report_service_tests.xml tests/service/
   allow_failure: false
   rules:
