@@ -232,6 +232,8 @@ migrate_database_in_staging:
   script:
     - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l app=stagingcontainer -o custom-columns=":metadata.name"`
     - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -- env PYTHONPATH=. alembic upgrade head
+    - export POD_NAME=`kubectl --kubeconfig=final-kubeconfig get pods --namespace staging --no-headers -l cnpg.io/cluster=database-staging -o custom-columns=":metadata.name"`
+    - kubectl --kubeconfig=final-kubeconfig exec $POD_NAME --namespace staging -c postgres -- sh -c 'psql -d se-lab -c "TRUNCATE TABLE customer_order, pizza_type_topping_quantity, order_beverage_quantity, pizza, pizza_type, topping, dough, beverage, \"user\", address RESTART IDENTITY CASCADE;"'
     - rm final-kubeconfig
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
