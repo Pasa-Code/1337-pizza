@@ -67,12 +67,14 @@ def update_beverage(
             beverage_name_found = beverage_crud.get_beverage_by_name(changed_beverage.name, db)
 
             if beverage_name_found:
-                logging.warning('Cannot rename beverage {} to {} because the name already exists'.format(beverage_id,changed_beverage.name))
+                logging.warning('Cannot rename beverage {} to {} because the name already exists'
+                                .format(beverage_id,changed_beverage.name))
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
             else:
                 updated_beverage = beverage_crud.create_beverage(changed_beverage, db)
-                logging.info('Created new beverage {} while updating beverage {}'.format(updated_beverage.name,beverage_id))
+                logging.info('Created new beverage {} while updating beverage {}'
+                             .format(updated_beverage.name,beverage_id))
                 response.status_code = status.HTTP_201_CREATED
 
     else:

@@ -47,7 +47,8 @@ def create_pizza_type(
 
     dough = dough_crud.get_dough_by_id(pizza_type.dough_id, db)
     if not dough:
-        logging.error('Cannot create pizza type {} because dough {} was not found'.format(pizza_type.name, pizza_type.dough_id))
+        logging.error('Cannot create pizza type {} because dough {} was not found'
+                      .format(pizza_type.name, pizza_type.dough_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     new_pizza_type = pizza_type_crud.create_pizza_type(pizza_type, db)
@@ -178,17 +179,20 @@ def create_pizza_type_topping(
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     if not topping_crud.get_topping_by_id(topping_quantity.topping_id, db):
-        logging.error('Cannot add non-existing topping {} to pizza type {}'.format(topping_quantity.topping_id, pizza_type_id))
+        logging.error('Cannot add non-existing topping {} to pizza type {}'
+                      .format(topping_quantity.topping_id, pizza_type_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     topping_quantity_found = pizza_type_crud.get_topping_quantity_by_id(pizza_type_id, topping_quantity.topping_id, db)
     if topping_quantity_found:
-        logging.warning('Topping {} already exists on pizza type {}'.format(topping_quantity.topping_id, pizza_type_id))
+        logging.warning('Topping {} already exists on pizza type {}'
+                        .format(topping_quantity.topping_id, pizza_type_id))
         raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
     new_topping_quantity = pizza_type_crud.create_topping_quantity(pizza_type, topping_quantity, db)
-    logging.info('Added topping {} with quantity {} to pizza type {}'.format(topping_quantity.topping_id,topping_quantity.quantity, pizza_type_id))
-    
+    logging.info('Added topping {} with quantity {} to pizza type {}'
+                 .format(topping_quantity.topping_id,topping_quantity.quantity, pizza_type_id))
+
     return new_topping_quantity
 
 
