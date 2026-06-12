@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from sqlalchemy.orm import Session
@@ -10,6 +11,10 @@ def create_beverage(schema: BeverageCreateSchema, db: Session):
     entity = Beverage(**schema.dict())
     db.add(entity)
     db.commit()
+
+    logging.info(f'Beverage {entity.name} stored in database')
+    logging.info(f'Beverage id: {entity.id}')
+
     return entity
 
 
@@ -33,11 +38,16 @@ def update_beverage(beverage: Beverage, changed_beverage: BeverageCreateSchema, 
 
     db.commit()
     db.refresh(beverage)
+
+    logging.info(f'Updated beverage {beverage.id} in database')
+
     return beverage
 
 
 def delete_beverage_by_id(beverage_id: uuid.UUID, db: Session):
     entity = get_beverage_by_id(beverage_id, db)
     if entity:
+        logging.info(f'Deleting beverage {beverage_id} from database')
         db.delete(entity)
         db.commit()
+
