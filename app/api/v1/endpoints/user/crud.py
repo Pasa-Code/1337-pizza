@@ -9,12 +9,15 @@ from app.database.models import User
 
 
 def create_user(schema: UserCreateSchema, db: Session):
+    logging.info('Creating user with username {}'.format(schema.username))
+
     entity = User(**schema.model_dump())
     db.add(entity)
     db.commit()
-    logging.info('User created with username {}'.format(entity.username))
-    return entity
+    db.refresh(entity)
 
+    logging.info('User created with id {} and username {}'.format(entity.id, entity.username))
+    return entity
 
 def get_user_by_username(username: str, db: Session):
     entity = db.query(User).filter(User.username == username).first()
@@ -32,19 +35,28 @@ def get_all_users(db: Session):
 
 
 def update_user(user: User, changed_user: UserCreateSchema, db: Session):
+    logging.info('Updating user with id {} and username {}'.format(user.id, user.username))
+
     for key, value in changed_user.dict().items():
         setattr(user, key, value)
 
     db.commit()
     db.refresh(user)
+
+    logging.info('User updated with id {} and username {}'.format(user.id, user.username))
     return user
 
 
 def delete_user_by_id(user_id: uuid.UUID, db: Session):
     entity = get_user_by_id(user_id, db)
+
     if entity:
+        logging.info('Deleting user with id {} and username {}'.format(entity.id, entity.username))
         db.delete(entity)
         db.commit()
+        logging.info('User deleted with id {}'.format(user_id))
+    else:
+        logging.warning('Could not delete user with id {} because user was not found'.format(user_id))
 
 
 def get_order_history_of_user(user_id: uuid.UUID, db: Session):
