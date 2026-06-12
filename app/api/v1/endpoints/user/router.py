@@ -32,6 +32,7 @@ def get_all_users(
 
 @router.post('', response_model=UserSchema, status_code=status.HTTP_201_CREATED, tags=['user'])
 def create_user(user: UserCreateSchema, db: Annotated[Session, Depends(get_db)]):
+    logging.info('POST user endpoint called for username {}'.format(user.username))
     new_user = user_crud.create_user(user, db)
     return new_user
 
@@ -42,13 +43,15 @@ def update_user(
         changed_user: UserCreateSchema,
         db: Annotated[Session, Depends(get_db)],
 ):
+    logging.info('PUT user endpoint called for user id {}'.format(user_id))
+
     user_found = user_crud.get_user_by_id(user_id, db)
 
     if user_found:
         user_crud.update_user(user_found, changed_user, db)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
-        logging.error('User {} not found'.format(user_id))
+        logging.warning('Cannot update user with id {} because user was not found'.format(user_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
 
@@ -59,8 +62,10 @@ def get_user(user_id: uuid.UUID,
     user_found = user_crud.get_user_by_id(user_id, db)
 
     if not user_found:
+        logging.warning('Cannot get user with id {} because user was not found'.format(user_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
+    logging.info('GET user endpoint returned user with id {}'.format(user_id))
     return user_found
 
 
@@ -69,9 +74,12 @@ def delete_user(
         user_id: uuid.UUID,
         db: Annotated[Session, Depends(get_db)],
 ):
+    logging.info('DELETE user endpoint called for user id {}'.format(user_id))
+
     user_found = user_crud.get_user_by_id(user_id, db)
 
     if not user_found:
+        logging.warning('Cannot delete user with id {} because user was not found'.format(user_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     user_crud.delete_user_by_id(user_id, db)
