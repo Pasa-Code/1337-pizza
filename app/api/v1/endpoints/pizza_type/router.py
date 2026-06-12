@@ -1,4 +1,5 @@
 import uuid
+import logging
 from typing import List, TypeVar, Annotated
 
 from fastapi import APIRouter, Depends, Request, Response, status, HTTPException
@@ -41,14 +42,18 @@ def create_pizza_type(
     pizza_type_found = pizza_type_crud.get_pizza_type_by_name(pizza_type.name, db)
 
     if pizza_type_found:
+        logging.warning('Pizza type with name {} already exists'.format(pizza_type.name))
         raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
     dough = dough_crud.get_dough_by_id(pizza_type.dough_id, db)
     if not dough:
+        logging.error('Cannot create pizza type {} because dough {} was not found'.format(pizza_type.name, pizza_type.dough_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     new_pizza_type = pizza_type_crud.create_pizza_type(pizza_type, db)
     response.status_code = status.HTTP_201_CREATED
+    logging.info('Pizza type {} created with dough {}'.format(new_pizza_type.name, new_pizza_type.dough_id))
+
     return new_pizza_type
 
 
@@ -66,18 +71,29 @@ def update_pizza_type(
     if pizza_type_found:
         if pizza_type_found.name == changed_pizza_type.name:
             pizza_type_crud.update_pizza_type(pizza_type_found, changed_pizza_type, db)
+            logging.info('Pizza type {} updated with values name:{}, price:{}, description:{}'
+                         .format(pizza_type_id,changed_pizza_type.name,changed_pizza_type.price,changed_pizza_type.description))
+
             return Response(status_code=status.HTTP_204_NO_CONTENT)
         else:
             pizza_type_name_found = pizza_type_crud.get_pizza_type_by_name(changed_pizza_type.name, db)
             if pizza_type_name_found:
+                logging.warning('Cannot rename pizza type {} to {} because the name already exists'
+                    .format(pizza_type_id,changed_pizza_type.name))
+
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT)
             else:
                 updated_pizza_type = pizza_type_crud.create_pizza_type(changed_pizza_type, db)
+
+                logging.info('Created new pizza type {} while updating pizza type {}'
+                    .format(updated_pizza_type.name,pizza_type_id))
+
                 response.status_code = status.HTTP_201_CREATED
     else:
+        logging.error('Pizza type {} not found during update'.format(pizza_type_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
-
     return updated_pizza_type
+
 
 
 @router.get('/{pizza_type_id}', response_model=PizzaTypeSchema, tags=['pizza_type'])
@@ -100,9 +116,12 @@ def delete_pizza_type(pizza_type_id: uuid.UUID,
     pizza_type = pizza_type_crud.get_pizza_type_by_id(pizza_type_id, db)
 
     if not pizza_type:
+        logging.error('Tried to delete non-existing pizza type {}'.format(pizza_type_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     pizza_type_crud.delete_pizza_type_by_id(pizza_type_id, db)
+
+    logging.info('Deleted pizza type {}'.format(pizza_type_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -155,16 +174,21 @@ def create_pizza_type_topping(
 ):
     pizza_type = pizza_type_crud.get_pizza_type_by_id(pizza_type_id, db)
     if not pizza_type:
+        logging.error('Cannot add topping to non-existing pizza type {}'.format(pizza_type_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     if not topping_crud.get_topping_by_id(topping_quantity.topping_id, db):
+        logging.error('Cannot add non-existing topping {} to pizza type {}'.format(topping_quantity.topping_id, pizza_type_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     topping_quantity_found = pizza_type_crud.get_topping_quantity_by_id(pizza_type_id, topping_quantity.topping_id, db)
     if topping_quantity_found:
+        logging.warning('Topping {} already exists on pizza type {}'.format(topping_quantity.topping_id, pizza_type_id))
         raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
     new_topping_quantity = pizza_type_crud.create_topping_quantity(pizza_type, topping_quantity, db)
+    logging.info('Added topping {} with quantity {} to pizza type {}'.format(topping_quantity.topping_id,topping_quantity.quantity, pizza_type_id))
+    
     return new_topping_quantity
 
 

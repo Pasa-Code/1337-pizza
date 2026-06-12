@@ -12,8 +12,8 @@ def create_beverage(schema: BeverageCreateSchema, db: Session):
     db.add(entity)
     db.commit()
 
-    logging.info(f'Beverage {entity.name} stored in database')
-    logging.info(f'Beverage id: {entity.id}')
+    logging.info('Beverage {} stored in database'.format(entity.name))
+    logging.info('Beverage id: {}'.format(entity.id))
 
     return entity
 
@@ -38,16 +38,14 @@ def update_beverage(beverage: Beverage, changed_beverage: BeverageCreateSchema, 
 
     db.commit()
     db.refresh(beverage)
-
-    logging.info(f'Updated beverage {beverage.id} in database')
-
+    logging.info('Updated beverage {} in database'.format(beverage.id))
     return beverage
 
 
 def delete_beverage_by_id(beverage_id: uuid.UUID, db: Session):
     entity = get_beverage_by_id(beverage_id, db)
     if entity:
-        logging.info(f'Deleting beverage {beverage_id} from database')
+        logging.info('Deleting beverage {} from database'.format(beverage_id))
         db.delete(entity)
         db.commit()
 

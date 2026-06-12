@@ -1,4 +1,5 @@
 import uuid
+import logging
 
 from sqlalchemy.orm import Session
 
@@ -12,6 +13,7 @@ def create_pizza_type(schema: PizzaTypeCreateSchema, db: Session):
     entity = PizzaType(**schema.dict())
     db.add(entity)
     db.commit()
+    logging.info('Pizza type {} stored in database'.format(entity.name))
     return entity
 
 
@@ -36,12 +38,15 @@ def update_pizza_type(pizza_type: PizzaType, changed_pizza_type: PizzaTypeCreate
 
     db.commit()
     db.refresh(pizza_type)
+    logging.info('Pizza type {} updated in database'.format(pizza_type.id))
+
     return pizza_type
 
 
 def delete_pizza_type_by_id(pizza_type_id: uuid.UUID, db: Session):
     entity = get_pizza_type_by_id(pizza_type_id, db)
     if entity:
+        logging.info('Deleting pizza type {} from database'.format(pizza_type_id))
         db.delete(entity)
         db.commit()
 
@@ -55,6 +60,8 @@ def create_topping_quantity(
     pizza_type.toppings.append(entity)
     db.commit()
     db.refresh(pizza_type)
+    logging.info('Added topping {} with quantity {} to pizza type {} in database'
+        .format(schema.topping_id,schema.quantity,pizza_type.id))
     return entity
 
 
