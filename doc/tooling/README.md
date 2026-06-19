@@ -105,14 +105,24 @@ warning. error. critical. info. debug.
 - What is the default logging level?
 info
 - Give 3-4 examples for logging commands in Python:
-  ```python
-  
+
+- Give 3-4 examples for logging commands in Python:
+
+```python
 import logging
+
 logging.debug("Debug information")
-logging.info("Pizza type{} created successfully").format(pizza_type_name)
-logging.warning("Pizza type {} already exists").format(pizza_type_name)
+
+logging.info(
+    "Pizza type {} created successfully".format(pizza_type_name)
+)
+
+logging.warning(
+    "Pizza type {} already exists".format(pizza_type_name)
+)
+
 logging.error("Pizza type not found")
-  ```
+```
 
 # SonarQube
 
