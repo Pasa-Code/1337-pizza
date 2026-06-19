@@ -96,14 +96,22 @@ If you like it convenient: Add a button for ruff to your toolbar!
 # GrayLog
 
 - What is the purpose of GrayLog?
+GrayLog is a centralized log management system. It collects, stores & visualizes log messages from applications and servers. 
+It helps developers monitor applications, detect errors and analyze problems in production environments.
 
 - What logging levels are available?
+warning. error. critical. info. debug. 
 
 - What is the default logging level?
-
+info
 - Give 3-4 examples for logging commands in Python:
   ```python
-
+  
+import logging
+logging.debug("Debug information")
+logging.info("Pizza type{} created successfully").format(pizza_type_name)
+logging.warning("Pizza type {} already exists").format(pizza_type_name)
+logging.error("Pizza type not found")
   ```
 
 # SonarQube
