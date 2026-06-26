@@ -2,9 +2,6 @@
 
 test_name: Make sure server implements functionality for editing order status correctly
 
-marks:
-  - skip
-
 includes:
   - !include common.yaml
   - !include ../users/user_stage.yaml
@@ -62,42 +59,42 @@ stages:
 
   - name: update order status and verify 204 with correct status "TRANSMITTED"
     request:
-      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}?order_status=TRANSMITTED
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?order_status=TRANSMITTED
       method: PUT
     response:
       status_code: 204
 
-  - name: update order status and verify 204 with correct status "PREPARING"
+  - name: update order status and verify 200 with correct status "PREPARING"
     request:
-      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}?order_status=PREPARING
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?order_status=PREPARING
       method: PUT
     response:
-      status_code: 204
+      status_code: 200
 
-  - name: update order status and verify 204 with correct status "IN_DELIVERY"
+  - name: update order status and verify 200 with correct status "IN_DELIVERY"
     request:
-      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}?order_status=IN_DELIVERY
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?order_status=IN_DELIVERY
       method: PUT
     response:
-      status_code: 204
+      status_code: 200
 
-  - name: update order status and verify 204 with correct status "COMPLETED"
+  - name: update order status and verify 200 with correct status "COMPLETED"
     request:
-      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}?order_status=COMPLETED
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?order_status=COMPLETED
       method: PUT
     response:
-      status_code: 204
+      status_code: 200
 
   - name: update order status and verify 422 with incorrect status "NOPENOPENOPE"
     request:
-      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}?order_status=NOPENOPENOPE
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?order_status=NOPENOPENOPE
       method: PUT
     response:
       status_code: 422
 
   - name: update order status and verify 404 with correct status "TRANSMITTED" and non existing order id
     request:
-      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/00000000-0000-0000-0000-000000000000?order_status=TRANSMITTED
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/00000000-0000-0000-0000-000000000000/status?order_status=TRANSMITTED
       method: PUT
     response:
       status_code: 404

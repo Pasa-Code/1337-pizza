@@ -162,3 +162,32 @@ def test_order_beverage_quantities(db):
     assert beverage_price == Decimal('100')
     assert pizza_price is None
     assert order_price == Decimal('100')
+
+def test_order_status_change(db):
+    new_address = AddressCreateSchema(
+        street='4714',
+        post_code='47273487234',
+        house_number=33,
+        country='4747',
+        town='4384437',
+        first_name='u55454',
+        last_name='43784734'
+    )
+    address_crud.create_address(new_address, db)
+
+    new_user = UserCreateSchema(
+        username='374874383'
+    )
+    db_user = user_crud.create_user(new_user, db)
+    user_id = db_user.id
+    new_order = OrderCreateSchema(
+        address=new_address,
+        user_id=user_id,
+    )
+
+    db_order = order_crud.create_order(new_order, db)
+    created_order_id = db_order.id
+
+    order_crud.update_order_status(db_order, OrderStatus.COMPLETED, db)
+    read_order = order_crud.get_order_by_id(created_order_id, db)
+    assert read_order.order_status == OrderStatus.COMPLETED

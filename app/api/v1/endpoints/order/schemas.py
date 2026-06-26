@@ -15,6 +15,8 @@ class OrderStatus(str, Enum):
     IN_DELIVERY = 'IN_DELIVERY'
     COMPLETED = 'COMPLETED'
 
+OrderStatusValues = [member.value for member in OrderStatus]
+
 
 class OrderBaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
