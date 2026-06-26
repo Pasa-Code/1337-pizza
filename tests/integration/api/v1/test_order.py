@@ -207,7 +207,7 @@ def test_crud_get_orders_by_status_and_all(db):
         first_name='Anna',
         last_name='Filter'
     )
-    db_address = address_crud.create_address(new_address, db)
+
 
     new_user = UserCreateSchema(
         username='anna_filter_123'
@@ -221,16 +221,16 @@ def test_crud_get_orders_by_status_and_all(db):
 
     order2_schema = OrderCreateSchema(address=new_address, user_id=db_user.id)
     db_order2 = order_crud.create_order(order2_schema, db)
-    order_crud.update_order_status(db_order2, OrderStatus.PENDING, db)
+    order_crud.update_order_status(db_order2, OrderStatus.TRANSMITTED, db)
     created_order2_id = db_order2.id
 
     completed_orders = order_crud.get_orders_by_status(db, OrderStatus.COMPLETED)
     completed_ids = [order.id for order in completed_orders]
 
     assert created_order1_id in completed_ids
-    assert created_order2_id not in completed_ids  # PENDING darf nicht hier drin sein
+    assert created_order2_id not in completed_ids  # TRANSMITTED darf nicht hier drin sein
 
-    pending_orders = order_crud.get_orders_by_status(db, OrderStatus.PENDING)
+    pending_orders = order_crud.get_orders_by_status(db, OrderStatus.TRANSMITTED)
     pending_ids = [order.id for order in pending_orders]
 
     assert created_order2_id in pending_ids
