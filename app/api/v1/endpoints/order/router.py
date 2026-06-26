@@ -389,7 +389,7 @@ def get_user_of_order(
 
 @router.put('/{order_id}/status',
             response_model=OrderSchema,
-            status_code=status.HTTP_204_NO_CONTENT,# tests expect 204 both by correct and redundant status inputs? IDK
+            status_code=status.HTTP_200_OK,
             tags=['order'],
             )
 def update_status_of_order(
