@@ -85,6 +85,22 @@ stages:
     response:
       status_code: 200
 
+  - name: Get all orders and check if filter for COMPLETED works (Status 200)
+    request:
+        # Order müsste hier completed sein, also sollte 200 geben
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order?order_status=COMPLETED
+      method: GET
+    response:
+      status_code: 200
+
+  - name: Get all orders with an invalid status filter and verify 422
+    request:
+      # Hier falscher status,sollte 422 geben
+      url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order?order_status=QUATSCHSTATUS
+      method: GET
+    response:
+      status_code: 422
+
   - name: update order status and verify 422 with incorrect status "NOPENOPENOPE"
     request:
       url: http://{tavern.env_vars.API_SERVER}:{tavern.env_vars.API_PORT}/v1/order/{order_id}/status?order_status=NOPENOPENOPE

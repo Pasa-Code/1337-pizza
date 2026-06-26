@@ -33,9 +33,18 @@ def get_db():
 @router.get('', response_model=List[OrderSchema], tags=['order'])
 def get_all_orders(
         db: Annotated[Session, Depends(get_db)],
+        order_status : Optional[str] = None # nicht "status"  genannt weil oben ein import im namen status existiert
 ):
-    orders = order_crud.get_all_orders(db)
-    logging.info('GET:returned all Orders')
+    if order_status is not None:
+        if order_status.upper() not in OrderStatusValues:
+            logging.error('GET: invalid status filter "{}", returning 422'.format(order_status))
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        status_enum = OrderStatus(order_status.upper())
+        orders = order_crud.get_orders_by_status(db, status_enum)
+        logging.info('GET: returned Orders filtered by status={}'.format(order_status))
+    else:
+        orders = order_crud.get_all_orders(db)
+        logging.info('GET: returned all Orders')
     return orders
 
 
