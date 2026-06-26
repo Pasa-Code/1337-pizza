@@ -33,10 +33,20 @@ def get_order_by_id(order_id: uuid.UUID, db: Session):
 
 
 def get_all_orders(db: Session):
-    entities = db.query(Order).all()
+    entities = (db.query(Order).order_by(Order.order_datetime.asc())
+                .all())
     logging.info('All orders returned')
     return entities
 
+def get_orders_by_status(db: Session, order_status: OrderStatus): # sorted oldest first
+    entities = (
+        db.query(Order)
+        .filter(Order.order_status == order_status)
+        .order_by(Order.order_datetime.asc())
+        .all()
+    )
+    logging.info('Orders with status:{} returned'.format(order_status))
+    return entities
 
 def delete_order_by_id(order_id: uuid.UUID, db: Session):
     entity = get_order_by_id(order_id, db)

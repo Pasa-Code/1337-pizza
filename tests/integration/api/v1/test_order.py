@@ -162,3 +162,83 @@ def test_order_beverage_quantities(db):
     assert beverage_price == Decimal('100')
     assert pizza_price is None
     assert order_price == Decimal('100')
+
+def test_order_status_change(db):
+    new_address = AddressCreateSchema(
+        street='4714',
+        post_code='47273487234',
+        house_number=33,
+        country='4747',
+        town='4384437',
+        first_name='u55454',
+        last_name='43784734'
+    )
+    address_crud.create_address(new_address, db)
+
+    new_user = UserCreateSchema(
+        username='374874383'
+    )
+    db_user = user_crud.create_user(new_user, db)
+    user_id = db_user.id
+    new_order = OrderCreateSchema(
+        address=new_address,
+        user_id=user_id,
+    )
+
+    db_order = order_crud.create_order(new_order, db)
+    created_order_id = db_order.id
+
+    order_crud.update_order_status(db_order, OrderStatus.COMPLETED, db)
+    read_order = order_crud.get_order_by_id(created_order_id, db)
+    assert read_order.order_status == OrderStatus.COMPLETED
+
+
+def test_crud_get_orders_by_status_and_all(db):
+    # Status quo vor dem Test festhalten
+    len_orders_before = len(order_crud.get_all_orders(db))
+
+    # Adresse & User anlegen
+    new_address = AddressCreateSchema(
+        street='Filter Street',
+        post_code='99999',
+        house_number=7,
+        country='Filterland',
+        town='Filter City',
+        first_name='Anna',
+        last_name='Filter'
+    )
+
+
+    new_user = UserCreateSchema(
+        username='anna_filter_123'
+    )
+    db_user = user_crud.create_user(new_user, db)
+
+    order1_schema = OrderCreateSchema(address=new_address, user_id=db_user.id)
+    db_order1 = order_crud.create_order(order1_schema, db)
+    order_crud.update_order_status(db_order1, OrderStatus.COMPLETED, db)
+    created_order1_id = db_order1.id
+
+    order2_schema = OrderCreateSchema(address=new_address, user_id=db_user.id)
+    db_order2 = order_crud.create_order(order2_schema, db)
+    order_crud.update_order_status(db_order2, OrderStatus.TRANSMITTED, db)
+    created_order2_id = db_order2.id
+
+    completed_orders = order_crud.get_orders_by_status(db, OrderStatus.COMPLETED)
+    completed_ids = [order.id for order in completed_orders]
+
+    assert created_order1_id in completed_ids
+    assert created_order2_id not in completed_ids  # TRANSMITTED darf nicht hier drin sein
+
+    pending_orders = order_crud.get_orders_by_status(db, OrderStatus.TRANSMITTED)
+    pending_ids = [order.id for order in pending_orders]
+
+    assert created_order2_id in pending_ids
+    assert created_order1_id not in pending_ids  # COMPLETED darf nicht hier drin sein
+
+    all_orders = order_crud.get_all_orders(db)
+    all_ids = [order.id for order in all_orders]
+
+    assert len(all_orders) >= len_orders_before + 2
+    assert created_order1_id in all_ids
+    assert created_order2_id in all_ids

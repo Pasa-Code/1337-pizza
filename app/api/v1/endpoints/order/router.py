@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import List, Optional, TypeVar, Annotated
 
-from fastapi import APIRouter, Depends, Request, Response, status, HTTPException
+from fastapi import APIRouter, Depends, Request, Response, status, HTTPException,Query
 from sqlalchemy.orm import Session
 
 import app.api.v1.endpoints.beverage.crud as beverage_crud
@@ -14,7 +14,7 @@ from app.api.v1.endpoints.order.stock_logic import stock_ingredients_crud
 from app.api.v1.endpoints.order.schemas \
     import OrderSchema, PizzaCreateSchema, JoinedPizzaPizzaTypeSchema, \
     PizzaWithoutPizzaTypeSchema, OrderBeverageQuantityCreateSchema, JoinedOrderBeverageQuantitySchema, \
-    OrderPriceSchema, OrderBeverageQuantityBaseSchema, OrderCreateSchema
+    OrderPriceSchema, OrderBeverageQuantityBaseSchema, OrderCreateSchema, OrderStatus, OrderStatusValues
 from app.api.v1.endpoints.user.schemas import UserSchema
 from app.database.connection import SessionLocal
 from app.api.v1.constants import NOT_FOUND_ERROR_OUTPUT
@@ -33,9 +33,20 @@ def get_db():
 @router.get('', response_model=List[OrderSchema], tags=['order'])
 def get_all_orders(
         db: Annotated[Session, Depends(get_db)],
+        order_status : Optional[str] = Query(None,alias='status') # nicht "status"  genannt weil
+        # oben ein import im namen status existiert
+
 ):
-    orders = order_crud.get_all_orders(db)
-    logging.info('GET:returned all Orders')
+    if order_status is not None:
+        if order_status.upper() not in OrderStatusValues:
+            logging.error('GET: invalid status filter "{}", returning 422'.format(order_status))
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        status_enum = OrderStatus(order_status.upper())
+        orders = order_crud.get_orders_by_status(db, status_enum)
+        logging.info('GET: returned Orders filtered by status={}'.format(order_status))
+    else:
+        orders = order_crud.get_all_orders(db)
+        logging.info('GET: returned all Orders')
     return orders
 
 
@@ -386,3 +397,30 @@ def get_user_of_order(
                       .format(order.user_id,order.id))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return user
+
+@router.put('/{order_id}/status',
+            response_model=OrderSchema,
+            status_code=status.HTTP_200_OK,
+            tags=['order'],
+            )
+def update_status_of_order(
+        order_id: uuid.UUID,
+        order_status: str,
+        db: Annotated[Session, Depends(get_db)],
+):
+    order = order_crud.get_order_by_id(order_id, db)
+    if not order:
+        logging.error('PUT: Order with id:{}, does not exist,returning 404'.format(order_id))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    if order_status.upper() not in OrderStatusValues:
+        logging.error('PUT: order status {} is not defined.'.format(order_status))
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    new_order_status = OrderStatus(order_status.upper())
+    if order.order_status == new_order_status:
+        logging.info('PUT: changing order with id:{} to the same status {}'.format(
+            order_id, order_status
+        ))
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return order_crud.update_order_status(order, new_order_status, db)
