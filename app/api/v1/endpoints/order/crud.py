@@ -33,7 +33,8 @@ def get_order_by_id(order_id: uuid.UUID, db: Session):
 
 
 def get_all_orders(db: Session):
-    entities = db.query(Order).all()
+    entities = (db.query(Order).order_by(Order.order_datetime.asc())
+                .all())
     logging.info('All orders returned')
     return entities
 

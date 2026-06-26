@@ -2,7 +2,8 @@ import logging
 import uuid
 from typing import List, Optional, TypeVar, Annotated
 
-from fastapi import APIRouter, Depends, Request, Response, status, HTTPException
+from fastapi import APIRouter, Depends, Request, Response, status, HTTPException,Query
+from setuptools.command.alias import alias
 from sqlalchemy.orm import Session
 
 import app.api.v1.endpoints.beverage.crud as beverage_crud
@@ -33,7 +34,7 @@ def get_db():
 @router.get('', response_model=List[OrderSchema], tags=['order'])
 def get_all_orders(
         db: Annotated[Session, Depends(get_db)],
-        order_status : Optional[str] = None # nicht "status"  genannt weil oben ein import im namen status existiert
+        order_status : Optional[str] = Query(None,alias="status") # nicht "status"  genannt weil oben ein import im namen status existiert
 ):
     if order_status is not None:
         if order_status.upper() not in OrderStatusValues:
