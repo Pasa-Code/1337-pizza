@@ -35,6 +35,8 @@ class PizzaType(Base):
 
     dough_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('dough.id'), nullable=False)
     dough: Mapped['Dough'] = relationship()
+    sauce_id:Mapped[uuid.UUID] = mapped_column(ForeignKey('sauce.id'), nullable=False)
+    sauce: Mapped['Sauce'] = relationship()
     toppings: Mapped[List['PizzaTypeToppingQuantity']] = relationship(cascade=DEFAULT_CASCADE,
                                                                       back_populates='pizza_type')
     type: Mapped[str] = mapped_column(nullable=True)
@@ -184,3 +186,16 @@ class Address(Base):
                " first_name='%s', last_name='%s')" \
             % (self.id, self.post_code, self.street, self.country, self.house_number,
                self.town, self.first_name, self.last_name)
+
+class Sauce(Base):
+    __tablename__ = 'sauce'
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    description: Mapped[str] = mapped_column(nullable=False, default='')
+    stock: Mapped[int] = mapped_column(CheckConstraint(STOCK_CHECK), nullable=False)
+
+    def __repr__(self):
+        return "Sauce(id='%s', name='%s', price='%s', description='%s', stock='%s')" \
+            % (self.id, self.name, self.price, self.description, self.stock)

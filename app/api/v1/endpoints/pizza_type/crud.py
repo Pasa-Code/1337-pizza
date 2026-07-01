@@ -2,14 +2,32 @@ import uuid
 import logging
 
 from sqlalchemy.orm import Session
+from unicodedata import decimal
 
 from app.api.v1.endpoints.pizza_type.schemas import \
     PizzaTypeCreateSchema, \
     PizzaTypeToppingQuantityCreateSchema
-from app.database.models import PizzaType, PizzaTypeToppingQuantity
+from app.database.models import PizzaType, PizzaTypeToppingQuantity, Sauce
 
 
 def create_pizza_type(schema: PizzaTypeCreateSchema, db: Session):
+    #Schauen ob eine Sauce im request angegeben wurde
+    if not schema.sauce_id:
+        #wenn nicht angegeben in DB nachschauen ob schon eine Tomatensauce existiert
+        default_sauce = db.query(Sauce).filter(Sauce.name.ilike("Tomatensauce")).first()
+        #fallback: Wenn keine existiert dann eine erstellen
+        if not default_sauce:
+            default_sauce = Sauce(
+                name = 'Tomatensauce',
+                price = 0.5,
+                description='Klassiker Sauce',
+                stock = 10
+            )
+            db.add(default_sauce)
+            db.flush() #Flush, um die id zu erstellen zu lassen während die transaktion nicht zuende ist
+            logging.info('Standard-Tomatensauce wurde automatisch in der DB angelegt mit stock = 10.')
+        #ID der Tomatensauce dem Schema zuweisen
+        schema.sauce_id = default_sauce.id
     entity = PizzaType(**schema.dict())
     db.add(entity)
     db.commit()

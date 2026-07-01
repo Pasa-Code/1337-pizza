@@ -6,6 +6,8 @@ from fastapi import APIRouter, Depends, Request, Response, status, HTTPException
 from sqlalchemy.orm import Session
 
 import app.api.v1.endpoints.dough.crud as dough_crud
+import app.api.v1.endpoints.sauce.crud as sauce_crud
+from app.api.v1.endpoints.sauce.schemas import SauceSchema
 import app.api.v1.endpoints.pizza_type.crud as pizza_type_crud
 import app.api.v1.endpoints.topping.crud as topping_crud
 from app.api.v1.endpoints.dough.schemas import DoughSchema
@@ -50,6 +52,13 @@ def create_pizza_type(
         logging.error('Cannot create pizza type {} because dough {} was not found'
                       .format(pizza_type.name, pizza_type.dough_id))
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
+
+    if pizza_type.sauce_id:
+        sauce = sauce_crud.get_sauce_by_id(pizza_type.sauce_id,db)
+        if not sauce:
+            logging.error('Cannot create Pizza type {} because sauce {} was not found'
+                          .format(pizza_type.name, pizza_type.sauce_id))
+            raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
 
     new_pizza_type = pizza_type_crud.create_pizza_type(pizza_type, db)
     response.status_code = status.HTTP_201_CREATED
@@ -214,3 +223,22 @@ def get_pizza_type_dough(
     dough = pizza_type.dough
 
     return dough
+
+@router.get(
+    '/{pizza_type_id}/sauce',
+    response_model=SauceSchema,
+    tags=['pizza_type'],
+)
+def get_pizza_type_sauce(
+        pizza_type_id: uuid.UUID,
+        db: Annotated[Session, Depends(get_db)],
+):
+    pizza_type = pizza_type_crud.get_pizza_type_by_id(pizza_type_id, db)
+
+    if not pizza_type:
+        logging.error('Cannot get sauce from non-existing pizza type {}'.format(pizza_type_id))
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR_OUTPUT)
+
+    sauce = pizza_type.sauce
+    logging.info('Sauce from Pizza type returned')
+    return sauce

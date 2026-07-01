@@ -34,6 +34,10 @@ tags_metadata = [
         'name': 'topping',
         'description': 'Operations with toppings. ',
     },
+    {
+        'name': 'sauce',
+        'description': 'Operations with sauce',
+    }
 ]
 app = FastAPI(openapi_tags=tags_metadata)
 
