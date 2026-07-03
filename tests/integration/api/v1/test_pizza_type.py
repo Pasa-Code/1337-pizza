@@ -4,6 +4,8 @@ from decimal import Decimal
 import app.api.v1.endpoints.pizza_type.crud as pizza_type_crud
 import app.api.v1.endpoints.dough.crud as dough_crud
 import app.api.v1.endpoints.topping.crud as topping_crud
+import app.api.v1.endpoints.sauce.crud as sauce_crud
+from app.api.v1.endpoints.sauce.crud import SauceCreateSchema
 from app.api.v1.endpoints.pizza_type.schemas import (
     PizzaTypeCreateSchema,
     PizzaTypeToppingQuantityCreateSchema,
@@ -37,7 +39,18 @@ def test_dough(db):
     yield dough
     dough_crud.delete_dough_by_id(dough.id, db)
 
-
+@pytest.fixture(scope='module')
+def test_sauce(db):
+    sauce = sauce_crud.create_Sauce(
+        SauceCreateSchema(
+            name='Test Sauce',
+            price=Decimal('1.00'),
+            description='Sauce Integrationstests',
+            stock= 100
+        ),db,
+    )
+    yield sauce
+    sauce_crud.delete_sauce_by_id(sauce.id, db)
 @pytest.fixture(scope='module')
 def test_topping(db):
     """Erstellt einen Topping-Eintrag als Voraussetzung für ToppingQuantity."""
@@ -54,7 +67,7 @@ def test_topping(db):
     topping_crud.delete_topping_by_id(topping.id, db)
 
 
-def test_pizza_type_create_read_delete(db, test_dough):
+def test_pizza_type_create_read_delete(db, test_dough,test_sauce):
     number_of_pizza_types_before = len(pizza_type_crud.get_all_pizza_types(db))
 
     # Arrange
@@ -62,6 +75,7 @@ def test_pizza_type_create_read_delete(db, test_dough):
         name='Test Margherita',
         price=Decimal('7.99'),
         description='Klassische Margherita',
+        sauce_id=test_sauce.id,
         dough_id=test_dough.id,
     )
 
@@ -94,7 +108,7 @@ def test_pizza_type_create_read_delete(db, test_dough):
     assert pizza_type_crud.get_pizza_type_by_id(created_id, db) is None
 
 
-def test_pizza_type_update(db, test_dough):
+def test_pizza_type_update(db, test_dough,test_sauce):
     # Arrange
     pizza_type = pizza_type_crud.create_pizza_type(
         PizzaTypeCreateSchema(
@@ -102,6 +116,7 @@ def test_pizza_type_update(db, test_dough):
             price=Decimal('8.99'),
             description='Alte Beschreibung',
             dough_id=test_dough.id,
+            sauce_id=test_sauce.id,
         ),
         db,
     )
@@ -114,6 +129,7 @@ def test_pizza_type_update(db, test_dough):
             price=Decimal('9.99'),
             description='Neue Beschreibung',
             dough_id=test_dough.id,
+            sauce_id=test_sauce.id,
         ),
         db,
     )

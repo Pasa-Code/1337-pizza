@@ -15,6 +15,11 @@ variables:
   topping_stock: 10
   quantity: 5
 
+  sauce_name: "Trio Sauce"
+  sauce_price: 1.00
+  sauce_description: "Joghurt,Tomaten,BBQ"
+  sauce_stock: 10
+
   dough_name: "Whole Grain"
   dough_price: 1.50
   dough_description: "Test Dough"
