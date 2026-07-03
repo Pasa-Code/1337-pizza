@@ -2,7 +2,6 @@ import uuid
 import logging
 
 from sqlalchemy.orm import Session
-from unicodedata import decimal
 
 from app.api.v1.endpoints.pizza_type.schemas import \
     PizzaTypeCreateSchema, \
@@ -14,7 +13,7 @@ def create_pizza_type(schema: PizzaTypeCreateSchema, db: Session):
     #Schauen ob eine Sauce im request angegeben wurde
     if not schema.sauce_id:
         #wenn nicht angegeben in DB nachschauen ob schon eine Tomatensauce existiert
-        default_sauce = db.query(Sauce).filter(Sauce.name.ilike("Tomatensauce")).first()
+        default_sauce = db.query(Sauce).filter(Sauce.name.ilike('Tomatensauce')).first()
         #fallback: Wenn keine existiert dann eine erstellen
         if not default_sauce:
             default_sauce = Sauce(

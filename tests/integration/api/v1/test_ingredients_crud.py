@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from app.database.connection import SessionLocal
-from app.database.models import PizzaType,Dough,Topping,PizzaTypeToppingQuantity
+from app.database.models import PizzaType,Dough,Topping,PizzaTypeToppingQuantity,Sauce
 from app.api.v1.endpoints.order.stock_logic.stock_ingredients_crud import (
     ingredients_are_available,
     reduce_stock_of_ingredients,
@@ -21,7 +21,8 @@ def db():
     finally:
         session.close()
 #hiilfsfunktion damit sich dieser teil nicht immer wiederholt
-def create_pizza_type_with_toppings(db: SessionLocal, dough_stock: int, topping_stock: int, qty: int) -> PizzaType:
+def create_pizza_type_with_toppings(db: SessionLocal, dough_stock: int, topping_stock: int, sauce_stock: int,
+                                    qty: int) -> PizzaType:
     dough = Dough(
         id=uuid.uuid4(),
         name=f'Test Dough {uuid.uuid4()}',
@@ -36,14 +37,22 @@ def create_pizza_type_with_toppings(db: SessionLocal, dough_stock: int, topping_
         description='test topping',
         stock=topping_stock,
     )
+    sauce = Sauce(
+        id=uuid.uuid4(),
+        name=f'Test sauce{uuid.uuid4()}',
+        price=Decimal('2.00'),
+        description='test sauce',
+        stock=sauce_stock
+    )
     pizza_type = PizzaType(
         id=uuid.uuid4(),
         name=f'Test Pizza {uuid.uuid4()}',
         price=Decimal('8.99'),
         description='test pizza',
-        dough_id=dough.id
+        dough_id=dough.id,
+        sauce_id = sauce.id
     )
-    db.add_all([dough, topping, pizza_type])
+    db.add_all([dough, topping, pizza_type,sauce])
     db.commit()
     db.refresh(dough)
     db.refresh(topping)
