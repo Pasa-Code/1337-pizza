@@ -67,7 +67,6 @@ def test_create_default_sauce_via_create_pizza_type(setup_dough,db):
         dough_id=setup_dough.id,
     )
     created_pizza_type = pizza_type_crud.create_pizza_type(pizza_type,db)
-    sauce_id_to_delete = created_pizza_type.sauce_id
 
     try:
         assert created_pizza_type is not None
