@@ -79,8 +79,10 @@ def test_create_default_sauce_via_create_pizza_type(setup_dough,db):
         assert sauce_in_db is not None
         assert sauce_in_db.name == 'Tomatensauce'
     finally:
-        pizza_type_crud.delete_pizza_type_by_id(created_pizza_type.id,db)
-        sauce_crud.delete_sauce_by_id(sauce_id_to_delete,db)
+        if created_pizza_type:
+            pizza_type_crud.delete_pizza_type_by_id(created_pizza_type.id,db)
+        #sauce nicht löschen da andere tests pizzen haben die noch die default sauce haben und deswegen
+        #wird das löschen verhindert da diese sauce dann noch gebraucht wird
 
 
 

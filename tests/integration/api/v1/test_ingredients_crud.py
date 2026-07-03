@@ -114,6 +114,7 @@ def test_ingredients_are_available_false_sauce_not_enough(db):
         topping_stock=10,
         qty=2,
     )
+    assert ingredients_are_available(pizza_type) is False
 
 def test_reduce_stock_of_ingredients(db):
     pizza_type = create_pizza_type_with_toppings(
