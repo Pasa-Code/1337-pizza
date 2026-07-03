@@ -88,6 +88,7 @@ def test_ingredients_are_available_false_dough_out_of_stock(db):
     pizza_type = create_pizza_type_with_toppings(
         db=db,
         dough_stock=0,   # kein Teig auf Lager
+        sauce_stock=5,
         topping_stock=10,
         qty=3,
     )
@@ -99,48 +100,67 @@ def test_ingredients_are_available_false_topping_not_enough(db):
     pizza_type = create_pizza_type_with_toppings(
         db=db,
         dough_stock=5,
+        sauce_stock= 5,
         topping_stock=2,  # zu wenig toppings
         qty=3,   #benötigte anzahl an toppings
     )
     assert ingredients_are_available(pizza_type) is False
 
+def test_ingredients_are_available_false_sauce_not_enough(db):
+    pizza_type = create_pizza_type_with_toppings(
+        db = db,
+        dough_stock=5,
+        sauce_stock=0,
+        topping_stock=10,
+        qty=2,
+    )
+
 def test_reduce_stock_of_ingredients(db):
     pizza_type = create_pizza_type_with_toppings(
         db=db,
         dough_stock=5,
+        sauce_stock=5,
         topping_stock=10,
         qty=2,
     )
 
     old_dough_stock = pizza_type.dough.stock
     old_topping_stock = pizza_type.toppings[0].topping.stock
+    old_sauce_stock = pizza_type.sauce.stock
 
     reduce_stock_of_ingredients(pizza_type, db)
     db.refresh(pizza_type.dough)
     db.refresh(pizza_type.toppings[0].topping)
+    db.refresh(pizza_type.sauce)
 
     assert pizza_type.dough.stock == old_dough_stock - 1
     assert pizza_type.toppings[0].topping.stock == old_topping_stock - 2
+    assert pizza_type.sauce.stock == old_sauce_stock - 1
 
 def test_increase_stock_of_ingredients(db):
     pizza_type = create_pizza_type_with_toppings(
         db=db,
         dough_stock=1,
+        sauce_stock=1,
         topping_stock=3,
         qty=1,
     )
 
     old_dough_stock = pizza_type.dough.stock
     old_topping_stock = pizza_type.toppings[0].topping.stock
+    old_sauce_stock = pizza_type.sauce.stock
 
     reduce_stock_of_ingredients(pizza_type, db)
     db.refresh(pizza_type.dough)
     db.refresh(pizza_type.toppings[0].topping)
+    db.refresh(pizza_type.sauce)
 
 
     increase_stock_of_ingredients(pizza_type, db)
     db.refresh(pizza_type.dough)
     db.refresh(pizza_type.toppings[0].topping)
+    db.refresh(pizza_type.sauce)
 
     assert pizza_type.dough.stock == old_dough_stock
     assert pizza_type.toppings[0].topping.stock == old_topping_stock
+    assert pizza_type.sauce.stock == old_sauce_stock
