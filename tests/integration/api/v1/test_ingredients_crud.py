@@ -78,6 +78,7 @@ def test_ingredients_are_available_true(db):
         db=db,
         dough_stock=5,
         topping_stock=10,
+        sauce_stock=5,
         qty=3,
     )
 
