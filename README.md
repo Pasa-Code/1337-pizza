@@ -1,30 +1,41 @@
-```glql
-query: label in (~tl::green, ~tl::red, ~tl::yellow)
-fields: title, author, labels, assignees
-title: Lab Checklists
-sort: title asc
-display: table
+# 1337 Pizza – REST-Backend für einen Pizza-Lieferdienst
+
+Teamprojekt im Modul **Software Engineering** an der Hochschule Darmstadt (Sommersemester 2026), umgesetzt von vier Studierenden.
+Der Service stellt eine REST-API für einen fiktiven Pizza-Lieferdienst bereit: Bestellungen, Pizzatypen, Teige, Saucen, Toppings, Getränke, Lagerbestände und Lieferadressen.
+
+## Tech-Stack
+
+- **Backend:** Python, FastAPI, SQLAlchemy, Alembic
+- **Datenbank:** PostgreSQL
+- **Infrastruktur:** Docker, Docker Compose, Kubernetes (Deployment-Manifeste)
+- **CI/CD & Qualität:** GitLab CI, SonarQube, Ruff, mypy
+- **Tests:** pytest (Unit- und Integrationstests), Tavern (Service-Tests)
+- **Logging:** Graylog
+
+## Ausgangslage
+
+Das Grundgerüst des Projekts (Projektstruktur, CI-Vorlage, Teile der Dokumentation) wurde von der Hochschule bereitgestellt.
+Darauf aufbauend hat das Team die Funktionalität über mehrere Labs hinweg erweitert.
+
+## Mein Beitrag
+
+- **Sauce-Endpunkt:** vollständig umgesetzt – Datenmodell, Alembic-Migration, Schemas, CRUD-Logik und Router, inklusive Integrationstest und Anpassung der bestehenden Tests
+- **Bestellungen:** Filtern nach Status und Sortieren nach Erstellungszeit
+- **Logging:** Logging für Bestellungen, Adressen und Lagerbestände ergänzt (Anbindung an Graylog)
+- **Tests:** Integrationstests für Teige, Zutaten, Getränkebestand und Pizzatypen; Service-Tests mit Tavern
+- **Code-Qualität:** Ruff- und SonarQube-Findings behoben
+
+## Lokal starten
+
+Voraussetzung: Docker
+
+```bash
+docker compose up --build
 ```
 
-![coverage](https://code.fbi.h-da.de/software-engineering-student-projects/se/26SS/Girschick-Mo3-Green/badges/main/coverage.svg?job=sonarqube-check)
+Die interaktive API-Dokumentation ist anschließend unter http://localhost:8000/docs erreichbar.
 
-# **1337 Pizza** - Pizza Delivery for Your *Nerdy* Needs
+## Hinweis
 
-**1337 Pizza** is a pizza delivery company, that has specialized on the needs of nerds.
-The unique selling propositions of **1337 Pizza** compared with their competitors are: 
-- 24/7 pizza delivery; ***you need it; we deliver it***
-- Any exotic pizza composition is possible; ***anything goes***
-- Pizza can be ordered hot or cold; ***we don't judge***
-- Orders can be placed through an API; ***talk API to us, baby***
-
-
-## Project Overview
-This repository contains all development artifacts related to the backend service of the **1337 Pizza**-delivery. It exposes an API endpoints that can be used by front-end applications. For this repository, however, front-end applications are out of scope. They may be developed by other teams.
-
-
-## Folder Structure of this Repository
-The following is a brief description of the folder structure of this project:
-- **app** - service's source code
-- **doc** - all documentation of the project - [entrypoint](doc/README.md)
-- **infra** - all infrastructure artifacts
-- **test** - all tests 
+Das Projekt wurde ursprünglich im GitLab der Hochschule entwickelt.
+Links in `doc/` und in der CI-Konfiguration verweisen teilweise auf interne Hochschul-Systeme, die öffentlich nicht erreichbar sind.
