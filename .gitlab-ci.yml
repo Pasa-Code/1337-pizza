@@ -1,5 +1,4 @@
 stages:
-  - print_readme
   - commit
   - acceptance
   - release
@@ -30,21 +29,6 @@ include:
       additional-images:
         - $CI_REGISTRY_IMAGE/$RELEASE_CONTAINER_NAME:latest
 
-##################################################
-# Tasks of "generate"- Stage
-##################################################
-print_readme:
-  stage: print_readme
-  variables:
-    GIT_STRATEGY: none
-  script:
-    - echo + Sonarqube Link "$sonarqube_link" +  Sonarqube Username "$sonarqube_user" + Sonarqube Password "$sonarqube_pass"
-    - echo + Graylog Link "$graylog_link" +  Graylog Username "$graylog_user" + Graylog Password "$graylog_pass"
-    - echo + Kubernetes Dashboard Link "$dashboard_link" +  Kubernetes Dashboard Token "$dashboard_token"
-  rules:
-    - if: $CI_COMMIT_BRANCH                            # branch pipelines
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # merge request pipelines
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH    # main pipeline
 
 create_development_container_image:
   variables:
